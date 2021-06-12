@@ -7,6 +7,6 @@ testclient:
 	go build -v ./src/testclient
 
 clean:
-	rm weechat-go testclient
+	rm weeclient testclient
 
 .PHONY: clean

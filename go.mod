@@ -1,4 +1,4 @@
-module github.com/maxking/weechat-go
+module github.com/maxking/weeclient
 
 go 1.16
 

@@ -1,7 +1,7 @@
-weechat-go
+weeclient
 ==========
 
-Weechat-go is a relay client for [Weechat](https://weechat.org).
+Weeclient is a relay client for [Weechat](https://weechat.org).
 
 
 Dependencies
@@ -16,14 +16,14 @@ Build
 To build the code, you can run:
 
 ```bash
-$ git checkout https://github.com/maxking/weechat-go
-$ cd weechat-go
+$ git checkout https://github.com/maxking/weeclient
+$ cd weeclient
 $ make
 ```
 
 Then, you can run with:
 ```bash
-$ ./weechat-go
+$ ./weeclient
 ```
 
 Testing Relay

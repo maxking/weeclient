@@ -7,9 +7,9 @@ import (
 	"net"
 	"os"
 
-	"github.com/maxking/weechat-go/src/client"
+	"github.com/maxking/weeclient/src/client"
 
-	"github.com/maxking/weechat-go/src/weechat"
+	"github.com/maxking/weeclient/src/weechat"
 )
 
 // Set of initial commands sent to weechat.

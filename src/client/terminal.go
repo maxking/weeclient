@@ -8,7 +8,7 @@ import (
 
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
-	"github.com/maxking/weechat-go/src/weechat"
+	"github.com/maxking/weeclient/src/weechat"
 )
 
 type WeechatTerminalUI struct {
