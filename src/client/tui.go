@@ -36,7 +36,7 @@ func (tv *TerminalView) SetCurrentBuffer(index int, mainText, secondaryText stri
 		if bufView, ok := tv.buffers[buf.FullName]; ok {
 			bufView.SetText((fmt.Sprintf("[%v] [%v] %v\n-----\n%v [%v]",
 				msgColor, buf.FullName, buf.Title,
-				color.StripWeechatColors(strings.Join(buf.Lines, "\n"), color.Upper),
+				color.StripWeechatColors(strings.Join(buf.Lines, "\n"), color.Colorize),
 				defaultColor)))
 		}
 		// Then, switch to the page that is embedding the above buffer widget.

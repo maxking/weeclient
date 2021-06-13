@@ -112,7 +112,7 @@ type HandleWeechatMessage interface {
 // output.
 func HandleMessage(msg *WeechatMessage, handler HandleWeechatMessage) error {
 	switch msg.Msgid {
-	case "listbuffers":
+	case "listbuffers", "_buffer_opened":
 		// parse out the list of buffers which are Hda objects.
 		bufffers := msg.Object.Value.(WeechatHdaValue)
 		buflist := make(map[string]*WeechatBuffer, len(bufffers.Value))
@@ -152,6 +152,7 @@ func HandleMessage(msg *WeechatMessage, handler HandleWeechatMessage) error {
 	case "nicklist":
 		// handle list of nicks.
 		handler.HandleNickList(msg)
+
 	default:
 		handler.Default(msg)
 	}
