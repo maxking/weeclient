@@ -112,7 +112,7 @@ func (tv *TerminalView) HandleLineAdded(line *weechat.WeechatLine) {
 	buf.Lines = append(buf.Lines, line)
 	// Also, add the message to the current view.
 	if bufView, ok := tv.buffers[buf.FullName]; ok {
-		bufView.Write([]byte(line.ToString(true)))
+		bufView.Write([]byte("\n" + line.ToString(true)))
 	}
 }
 
