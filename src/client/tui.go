@@ -23,7 +23,7 @@ func (bw *BufferListWidget) getByFullName(fullname string) *weechat.WeechatBuffe
 
 func NewBufferListWidget(buflist map[string]*weechat.WeechatBuffer) *BufferListWidget {
 	widget := &BufferListWidget{
-		List:    tview.NewList(),
+		List:    tview.NewList().ShowSecondaryText(false),
 		Buffers: buflist,
 	}
 	return widget
@@ -45,10 +45,10 @@ type TerminalView struct {
 func (tv *TerminalView) SetCurrentBuffer(index int, mainText, secondaryText string, shortcut rune) {
 	buf := tv.bufferList.getByFullName(mainText)
 	if buf != nil {
-		tv.buffer.SetText(fmt.Sprintf("index: %v primary: %v secondary: %v\n\n\n----\n %v\n%v",
+		tv.buffer.SetText(fmt.Sprintf("index: %v primary: %v secondary: %v\n----\n %v\n%v",
 			index, mainText, secondaryText, buf.FullName, buf.Title))
 	} else {
-		tv.buffer.SetText(fmt.Sprintf("Buffer not found! \nindex: %v primary: %v secondary: %v\n%v\n\n=====\n",
+		tv.buffer.SetText(fmt.Sprintf("Buffer not found! \nindex: %v primary: %v secondary: %v\n%v\n=====\n",
 			index, mainText, secondaryText, tv.bufferList))
 	}
 }
@@ -95,21 +95,8 @@ func TviewStart(weechan chan *weechat.WeechatMessage) {
 
 	view := &TerminalView{app: app, grid: grid, bufferList: buflist, buffer: textView}
 	view.bufferList.List.SetChangedFunc(view.SetCurrentBuffer)
-	// list := tview.NewList().
-	// 	AddItem("List item 1", "Some explanatory text", 'a', nil).
-	// 	AddItem("List item 2", "Some explanatory text", 'b', nil).
-	// 	AddItem("List item 3", "Some explanatory text", 'c', nil).
-	// 	AddItem("List item 4", "Some explanatory text", 'd', nil)
 
-	// list.AddItem("Quit", "Press to exit", 'q', func() {
-	// 	app.Stop()
-	// })
-	// list.AddItem("Add One", "Press to add a new entry", 'n', func() {
-	// 	list.AddItem(fmt.Sprintf("List item %v", list.GetItemCount()+1),
-	// 		"Newly added item", 'o', nil)
-	// })
-
-	// Read from the weechat incoming queue.
+	// Read from the weechat incoming queue and enquee for handling.
 	go func() {
 		for msg := range weechan {
 			weechat.HandleMessage(msg, view)
