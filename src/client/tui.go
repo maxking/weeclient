@@ -1,3 +1,4 @@
+// Terminal based relay client for Weechat.
 package client
 
 import (

@@ -1,4 +1,4 @@
-// weechat protocol parser.
+// Weechat protocol parser.
 package weechat
 
 import (

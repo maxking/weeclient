@@ -1,3 +1,4 @@
+// Handle colors in Weechat strings.
 package color
 
 import (

@@ -1,3 +1,4 @@
+// Testing CLI for Weechat relay protocol.
 package main
 
 import (
