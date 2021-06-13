@@ -72,9 +72,10 @@ func (tv *TerminalView) FocusBuffer(index int, mainText, SecondaryTest string, s
 	tv.app.SetFocus(tv.pages)
 }
 
-// ************************************
-// Methods for Weechat message Handler.
-// ************************************
+// *******************************************
+// Methods for HandleWeechatMessage interface.
+// *******************************************
+
 func (tv *TerminalView) HandleListBuffers(buflist map[string]*weechat.WeechatBuffer) {
 	for ptr, buf := range buflist {
 		tv.HandleBufferOpened(ptr, buf)
@@ -88,19 +89,30 @@ func (tv *TerminalView) HandleBufferOpened(ptr string, buf *weechat.WeechatBuffe
 		SetTextAlign(tview.AlignLeft).
 		SetWordWrap(true).
 		SetDynamicColors(true).
-		SetText(fmt.Sprintf("[%v] %v\n-----\n%v", buf.FullName, buf.Title, strings.Join(buf.Lines, "\n")))
+		SetText(fmt.Sprintf("[%v] %v\n-----\n%v",
+			buf.FullName, buf.Title, strings.Join(buf.Lines, "\n")))
 
 	input := tview.NewInputField().
-		SetLabel("> ").
 		SetFieldBackgroundColor(tcell.ColorGray).
 		SetFieldTextColor(tcell.ColorWhite).
 		SetPlaceholderTextColor(tcell.ColorWhiteSmoke).
-		SetPlaceholder("type here...")
+		SetPlaceholder("Type here...")
 
+	// Set handlers for key events in the input box.
+	// 1. Enter -> Send message and clear box
+	// 2. Esc -> clear box
 	input.SetDoneFunc(func(key tcell.Key) {
-		sendobj := weechat.WeechatSendMessage{Message: input.GetText(), Buffer: buf.FullName}
-		tv.sendchan <- &sendobj
-		input.SetText("")
+		switch key {
+		case tcell.KeyEnter:
+			sendobj := weechat.WeechatSendMessage{
+				Message: input.GetText(),
+				Buffer:  buf.FullName}
+			tv.sendchan <- &sendobj
+			input.SetText("")
+		case tcell.KeyEscape:
+			input.SetText("")
+		}
+
 	})
 
 	layout := tview.NewGrid().
@@ -125,10 +137,6 @@ func (tv *TerminalView) HandleBufferOpened(ptr string, buf *weechat.WeechatBuffe
 	tv.buffers[buf.FullName] = bufferView
 }
 
-func (tv *TerminalView) HandleListLines() {
-
-}
-
 func (tv *TerminalView) HandleNickList(msg *weechat.WeechatMessage) {
 
 }
@@ -140,7 +148,9 @@ func (tv *TerminalView) HandleLineAdded(line *weechat.WeechatLine) {
 	if bufView, ok := tv.buffers[buf.FullName]; ok {
 		secs, _ := strconv.ParseInt(line.Date, 10, 64)
 		unixtime := time.Unix(secs, 0)
-		bufView.Write([]byte(fmt.Sprintf("\n[%v:%v] <%v>: %v", unixtime.Hour(), unixtime.Minute(), line.Prefix, line.Message)))
+		bufView.Write([]byte(
+			fmt.Sprintf("\n[%v:%v] <%v>: %v", unixtime.Hour(),
+				unixtime.Minute(), line.Prefix, line.Message)))
 	}
 }
 
@@ -148,7 +158,8 @@ func (tv *TerminalView) Default(msg *weechat.WeechatMessage) {
 
 }
 
-func TviewStart(weechan chan *weechat.WeechatMessage, sendchan chan *weechat.WeechatSendMessage) {
+func TviewStart(
+	weechan chan *weechat.WeechatMessage, sendchan chan *weechat.WeechatSendMessage) {
 	app := tview.NewApplication()
 	bufffers := make(map[string]*Buffer)
 	buflist := NewBufferListWidget(bufffers)
@@ -161,9 +172,25 @@ func TviewStart(weechan chan *weechat.WeechatMessage, sendchan chan *weechat.Wee
 		AddItem(buflist.List, 0, 0, 1, 1, 0, 0, true).
 		AddItem(bufferspage, 0, 1, 1, 1, 0, 0, false)
 
-	view := &TerminalView{app: app, grid: grid, bufferList: buflist, pages: bufferspage, buffers: bufferViews, sendchan: sendchan}
+	// Create a terminalview object which holds all the state
+	// for the current state of the terminal.
+	view := &TerminalView{
+		app:        app,
+		grid:       grid,
+		bufferList: buflist,
+		pages:      bufferspage,
+		buffers:    bufferViews,
+		sendchan:   sendchan}
 	view.bufferList.List.SetChangedFunc(view.SetCurrentBuffer)
 	view.bufferList.List.SetSelectedFunc(view.FocusBuffer)
+
+	// Set keybindings to move the focus back to buffer list.
+	view.app.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Key() == tcell.KeyCtrlA {
+			view.app.SetFocus(view.bufferList.List)
+		}
+		return event
+	})
 
 	// Read from the weechat incoming queue and enquee for handling.
 	go func() {
@@ -174,7 +201,7 @@ func TviewStart(weechan chan *weechat.WeechatMessage, sendchan chan *weechat.Wee
 
 	if err := view.app.SetRoot(grid, true).SetFocus(grid).Run(); err != nil {
 		// panic(err)
-		fmt.Println(fmt.Errorf("Error from the application: %v", err))
+		fmt.Println(fmt.Errorf("error from the application: %v", err))
 		os.Exit(1)
 	}
 }

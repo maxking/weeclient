@@ -94,8 +94,6 @@ func (wb WeechatBuffer) AddLine(message string) {
 type HandleWeechatMessage interface {
 	HandleListBuffers(map[string]*WeechatBuffer)
 
-	HandleListLines()
-
 	HandleNickList(*WeechatMessage)
 
 	HandleLineAdded(*WeechatLine)
@@ -144,7 +142,6 @@ func HandleMessage(msg *WeechatMessage, handler HandleWeechatMessage) error {
 			}
 			handler.HandleLineAdded(&line)
 		}
-		handler.HandleListLines()
 		// add the lines to a buffer.
 	case "nicklist":
 		// handle list of nicks.

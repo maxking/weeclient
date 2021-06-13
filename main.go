@@ -60,10 +60,10 @@ func main() {
 
 	weeproto := weechat.Protocol{}
 
+	// Channel to process incoming message and passing it on to terminal ui.
+	// Goroutine runs in a loop and listens to messages from weechat relay.
 	weechan := make(chan *weechat.WeechatMessage)
-
-	sendchan := make(chan *weechat.WeechatSendMessage)
-
+	// handle receiving of message.
 	go func() {
 		for {
 			// first, read the length of the next message and block on
@@ -89,6 +89,9 @@ func main() {
 		}
 	}()
 
+	// channel to send message. message is received from terminal ui and sent to remote
+	// server in the goroutine.
+	sendchan := make(chan *weechat.WeechatSendMessage)
 	// handle sending of message.
 	go func() {
 		for sendmsg := range sendchan {
@@ -96,6 +99,6 @@ func main() {
 		}
 	}()
 
+	// Start the terminal app.
 	client.TviewStart(weechan, sendchan)
-
 }
