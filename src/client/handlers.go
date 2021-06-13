@@ -2,12 +2,8 @@ package client
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
-	"time"
 
 	"github.com/gdamore/tcell/v2"
-	"github.com/maxking/weeclient/src/color"
 	"github.com/maxking/weeclient/src/weechat"
 	"github.com/rivo/tview"
 )
@@ -36,8 +32,7 @@ func (tv *TerminalView) HandleBufferOpened(ptr string, buf *weechat.WeechatBuffe
 		SetTextAlign(tview.AlignLeft).
 		SetWordWrap(true).
 		SetDynamicColors(true).
-		SetText(fmt.Sprintf("[%v][%v] %v\n-----[%v]\n%v",
-			titleColor, buf.FullName, buf.Title, defaultColor, strings.Join(buf.Lines, "\n")))
+		SetText(buf.TitleStr(true) + buf.GetLines(true))
 
 	input := tview.NewInputField().
 		SetFieldBackgroundColor(tcell.ColorGray).
@@ -114,14 +109,10 @@ func (tv *TerminalView) HandleNickList(msg *weechat.WeechatMessage) {
 // Handle a _buffer_line_added event from Weechat server.
 func (tv *TerminalView) HandleLineAdded(line *weechat.WeechatLine) {
 	buf := tv.bufferList.Buffers[line.Buffer]
-	buf.Lines = append(buf.Lines, line.Message)
+	buf.Lines = append(buf.Lines, line)
 	// Also, add the message to the current view.
 	if bufView, ok := tv.buffers[buf.FullName]; ok {
-		secs, _ := strconv.ParseInt(line.Date, 10, 64)
-		unixtime := time.Unix(secs, 0)
-		bufView.Write([]byte(
-			fmt.Sprintf("\n[%v][%v:%v] [%v] <%v>: %v[%v]",
-				timeColor, unixtime.Hour(), unixtime.Minute(), msgColor, line.Prefix, color.StripWeechatColors(line.Message, color.Colorize), defaultColor)))
+		bufView.Write([]byte(line.ToString(true)))
 	}
 }
 

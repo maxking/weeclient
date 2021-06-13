@@ -1,5 +1,14 @@
 package weechat
 
+import (
+	"fmt"
+	"regexp"
+	"strings"
+	"time"
+
+	"github.com/maxking/weeclient/src/color"
+)
+
 // Core weechat object. This represents a parsed Core object type.
 // It doesn't currently capture all the data in a single object
 // and kinda uses only a single untyped Value fields. In future,
@@ -69,7 +78,7 @@ type WeechatHdaValue struct {
 }
 
 type WeechatBuffer struct {
-	Lines     []string
+	Lines     []*WeechatLine
 	ShortName string
 	FullName  string
 	Number    uint32
@@ -78,12 +87,29 @@ type WeechatBuffer struct {
 	Path      string
 }
 
+// Get the Title of the Buffer with color if asked for.
+func (b *WeechatBuffer) TitleStr(shouldColor bool) string {
+	if shouldColor {
+		return fmt.Sprintf("[%v][%v][%v] %v[%v]\n---\n",
+			color.ChanColor, b.FullName, color.TitleColor, b.Title, color.DefaultColor)
+	}
+	return fmt.Sprintf("[%v] %v\n---\n", b.FullName, b.Title)
+}
+
+func (b *WeechatBuffer) GetLines(shouldColor bool) string {
+	var lines []string
+	for _, line := range b.Lines {
+		lines = append(lines, color.ReplaceWeechatColors(line.ToString(shouldColor), color.Colorize))
+	}
+	return strings.Join(lines, "\n")
+}
+
 // All the information about a new line.
 type WeechatLine struct {
 	// Path of the buffer.
 	Buffer      string
-	Date        string
-	DatePrinted string
+	Date        time.Time
+	DatePrinted time.Time
 	Displayed   bool
 	NotifyLevel int
 	Highlight   bool
@@ -92,69 +118,31 @@ type WeechatLine struct {
 	Message     string
 }
 
-func (wb WeechatBuffer) AddLine(message string) {
-	wb.Lines = append(wb.Lines, message)
-}
-
-// Interface for handler that handles various events.
-type HandleWeechatMessage interface {
-	HandleListBuffers(map[string]*WeechatBuffer)
-
-	HandleNickList(*WeechatMessage)
-
-	HandleLineAdded(*WeechatLine)
-
-	Default(*WeechatMessage)
-}
-
-// Parse the message into More useful data structures that can be used by higher
-// level UI functions. It expects an interface which handles parsed structured
-// output.
-func HandleMessage(msg *WeechatMessage, handler HandleWeechatMessage) error {
-	switch msg.Msgid {
-	case "listbuffers", "_buffer_opened":
-		// parse out the list of buffers which are Hda objects.
-		bufffers := msg.Object.Value.(WeechatHdaValue)
-		buflist := make(map[string]*WeechatBuffer, len(bufffers.Value))
-
-		for _, each := range bufffers.Value {
-			buf := &WeechatBuffer{
-				ShortName: each["short_name"].Value.(string),
-				FullName:  each["full_name"].Value.(string),
-				Title:     each["title"].Value.(string),
-				Number:    each["number"].Value.(uint32),
-				LocalVars: each["local_variables"].Value.(map[WeechatObject]WeechatObject),
-				Lines:     []string{""},
-				// this is essentially a list of strings, pointers,
-				// the first pointer of which is the buffer' pointer.
-				Path: each["__path"].Value.([]string)[1],
-			}
-			buflist[buf.Path] = buf
-		}
-
-		handler.HandleListBuffers(buflist)
-
-	case "_buffer_line_added", "listlines":
-		for _, each := range msg.Object.Value.(WeechatHdaValue).Value {
-			line := WeechatLine{
-				Buffer:  each["buffer"].as_string(),
-				Message: each["message"].as_string(),
-				Date:    each["date"].as_string(),
-				// DatePrinted: each["date_printed"].as_string(),
-				Displayed: each["displayed"].as_bool(),
-				// NotifyLevel: each["notify_level"].as_int(),
-				Highlight: each["highlight"].as_bool(),
-				Prefix:    each["prefix"].as_string(),
-			}
-			handler.HandleLineAdded(&line)
-		}
-		// add the lines to a buffer.
-	case "nicklist":
-		// handle list of nicks.
-		handler.HandleNickList(msg)
-
-	default:
-		handler.Default(msg)
+// Return the string representation of the line to be printed in the
+// ui. Use optional coloring.
+func (l *WeechatLine) ToString(shouldColor bool) string {
+	if shouldColor {
+		// WHen using [color] for coloring the output, we want to make sure
+		// the actual text within square braces isn't lost trying to color
+		// the output. To do that, we need to escape it by replacing `]` by
+		// `[]` resulting in something like `[hello[]` to print `[hello]`
+		// https://pkg.go.dev/github.com/rivo/tview@v0.0.0-20210608105643-d4fb0348227b?utm_source=gopls#hdr-Colors
+		re := regexp.MustCompile(`\]`)
+		msg := string(re.ReplaceAll([]byte(l.Message), []byte("[]")))
+		return fmt.Sprintf("\n[%v][%v:%v] [%v] %v: %v[%v]",
+			color.TimeColor, l.Date.Hour(), l.Date.Minute(),
+			color.MsgColor, l.Prefix,
+			color.ReplaceWeechatColors(msg, color.Colorize),
+			color.DefaultColor)
 	}
-	return nil
+	return fmt.Sprintf("[%v:%v] %v: %v",
+		l.Date.Hour(), l.Date.Minute(),
+		l.Prefix,
+		// Replace colors with just nothing.
+		color.ReplaceWeechatColors(l.Message, func(s string) string { return "" }))
+
 }
+
+// func (wb WeechatBuffer) AddLine(message string) {
+// 	wb.Lines = append(wb.Lines, message)
+// }

@@ -123,7 +123,7 @@ func (mh *TerminalPrintHandler) HandleNickList(msg *weechat.WeechatMessage) {
 }
 
 func (mh *TerminalPrintHandler) HandleLineAdded(line *weechat.WeechatLine) {
-	fmt.Printf(color.Cyan+"%: %v \n"+color.Reset, line.Buffer, line.Message)
+	fmt.Printf(color.Cyan+"%: %v \n"+color.Reset, line.Buffer, line.ToString(false))
 }
 
 func (mh *TerminalPrintHandler) Default(msg *weechat.WeechatMessage) {

@@ -4,20 +4,10 @@ package client
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/gdamore/tcell/v2"
-	"github.com/maxking/weeclient/src/color"
 	"github.com/maxking/weeclient/src/weechat"
 	"github.com/rivo/tview"
-)
-
-const (
-	titleColor   = "red"
-	defaultColor = "white"
-	timeColor    = "green"
-	msgColor     = "yellow"
-	chatColor    = "grey"
 )
 
 type TerminalView struct {
@@ -35,10 +25,7 @@ func (tv *TerminalView) SetCurrentBuffer(index int, mainText, secondaryText stri
 	if buf != nil {
 		// For the buffer widget, set the right number of lines.
 		if bufView, ok := tv.buffers[buf.FullName]; ok {
-			bufView.SetText((fmt.Sprintf("[%v] [%v] %v\n-----\n%v [%v]",
-				msgColor, buf.FullName, buf.Title,
-				color.StripWeechatColors(strings.Join(buf.Lines, "\n"), color.Colorize),
-				defaultColor)))
+			bufView.SetText(buf.TitleStr(true) + buf.GetLines(true))
 		}
 		// Then, switch to the page that is embedding the above buffer widget.
 		tv.pages.SwitchToPage(fmt.Sprintf("page-%v", mainText))

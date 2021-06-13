@@ -1,4 +1,3 @@
-// Weechat protocol parser.
 package weechat
 
 import (

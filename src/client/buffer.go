@@ -19,11 +19,11 @@ type BufferListWidget struct {
 	Buffers map[string]*Buffer
 }
 
-func (bw *BufferListWidget) getByFullName(fullname string) *weechat.WeechatBuffer {
+func (bw *BufferListWidget) getByFullName(fullname string) *Buffer {
 	name := color.RemoveColor(fullname)
 	for _, buf := range bw.Buffers {
 		if buf.FullName == name {
-			return buf.WeechatBuffer
+			return buf
 		}
 	}
 	// panic(fmt.Sprintf("fullname: %v name: %v  -- failed to find buffer by fullname", fullname, name))

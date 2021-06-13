@@ -6,6 +6,15 @@ import (
 	"regexp"
 )
 
+const (
+	TitleColor   = "red"
+	DefaultColor = "white"
+	TimeColor    = "green"
+	MsgColor     = "yellow"
+	ChatColor    = "grey"
+	ChanColor    = "yellow"
+)
+
 var Reset = "\033[0m"
 var Red = "\033[31m"
 var Green = "\033[32m"
@@ -37,7 +46,7 @@ var (
 
 // Replace the weechat colors parsed using regex and use the replaceFund to
 // find substituations.
-func StripWeechatColors(with_color string, replacefunc func(string) string) string {
+func ReplaceWeechatColors(with_color string, replacefunc func(string) string) string {
 	re := regexp.MustCompile(ColorsRe)
 	return re.ReplaceAllStringFunc(with_color, replacefunc)
 }
