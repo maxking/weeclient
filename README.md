@@ -3,6 +3,8 @@ weeclient
 
 Weeclient is a relay client for [Weechat](https://weechat.org).
 
+[![Go Documentation](https://pkg.go.dev/badge/github.com/maxking/weeclient.svg)](https://pkg.go.dev/github.com/maxking/weeclient) [![Gituhb Action](https://github.com/maxking/weeclient/actions/workflows/go.yml/badge.svg)](https://github.com/maxking/weeclient/actions/workflows/go.yml)
+
 
 Dependencies
 ------------
