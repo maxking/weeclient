@@ -46,8 +46,9 @@ func (w *BufferListWidget) AddBuffer(buffer *weechat.WeechatBuffer) {
 }
 
 type TerminalView struct {
-	app  *tview.Application
-	grid *tview.Grid
+	app      *tview.Application
+	grid     *tview.Grid
+	sendchan chan *weechat.WeechatSendMessage
 
 	bufferList *BufferListWidget
 	pages      *tview.Pages
@@ -64,7 +65,6 @@ func (tv *TerminalView) SetCurrentBuffer(index int, mainText, secondaryText stri
 		}
 		// Then, switch to the page that is embedding the above buffer widget.
 		tv.pages.SwitchToPage(fmt.Sprintf("page-%v", mainText))
-		// tv.app.SetFocus(tv.pages)
 	}
 }
 
@@ -98,7 +98,8 @@ func (tv *TerminalView) HandleBufferOpened(ptr string, buf *weechat.WeechatBuffe
 		SetPlaceholder("type here...")
 
 	input.SetDoneFunc(func(key tcell.Key) {
-		bufferView.Write([]byte(input.GetText()))
+		sendobj := weechat.WeechatSendMessage{Message: input.GetText(), Buffer: buf.FullName}
+		tv.sendchan <- &sendobj
 		input.SetText("")
 	})
 
@@ -147,7 +148,7 @@ func (tv *TerminalView) Default(msg *weechat.WeechatMessage) {
 
 }
 
-func TviewStart(weechan chan *weechat.WeechatMessage) {
+func TviewStart(weechan chan *weechat.WeechatMessage, sendchan chan *weechat.WeechatSendMessage) {
 	app := tview.NewApplication()
 	bufffers := make(map[string]*Buffer)
 	buflist := NewBufferListWidget(bufffers)
@@ -160,16 +161,9 @@ func TviewStart(weechan chan *weechat.WeechatMessage) {
 		AddItem(buflist.List, 0, 0, 1, 1, 0, 0, true).
 		AddItem(bufferspage, 0, 1, 1, 1, 0, 0, false)
 
-	view := &TerminalView{app: app, grid: grid, bufferList: buflist, pages: bufferspage, buffers: bufferViews}
+	view := &TerminalView{app: app, grid: grid, bufferList: buflist, pages: bufferspage, buffers: bufferViews, sendchan: sendchan}
 	view.bufferList.List.SetChangedFunc(view.SetCurrentBuffer)
 	view.bufferList.List.SetSelectedFunc(view.FocusBuffer)
-	// view.bufferList.List.SetMouseCapture(
-	// 	func(action tview.MouseAction, event *tcell.EventMouse) (tview.MouseAction, *tcell.EventMouse) {
-	// 		if action == tview.MouseLeftClick || action == tview.MouseLeftUp || action == tview.MouseLeftDown {
-	// 			view.app.SetFocus(buflist.List)
-	// 		}
-	// 		return action, event
-	// 	})
 
 	// Read from the weechat incoming queue and enquee for handling.
 	go func() {

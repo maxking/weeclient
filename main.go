@@ -62,7 +62,7 @@ func main() {
 
 	weechan := make(chan *weechat.WeechatMessage)
 
-	// sendchan := make(chan []bytes)
+	sendchan := make(chan *weechat.WeechatSendMessage)
 
 	go func() {
 		for {
@@ -90,7 +90,12 @@ func main() {
 	}()
 
 	// handle sending of message.
+	go func() {
+		for sendmsg := range sendchan {
+			conn.Write([]byte(fmt.Sprintf("input %v %v\n", sendmsg.Buffer, sendmsg.Message)))
+		}
+	}()
 
-	client.TviewStart(weechan)
+	client.TviewStart(weechan, sendchan)
 
 }

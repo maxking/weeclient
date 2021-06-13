@@ -154,3 +154,8 @@ func HandleMessage(msg *WeechatMessage, handler HandleWeechatMessage) error {
 	}
 	return nil
 }
+
+type WeechatSendMessage struct {
+	Message string
+	Buffer  string
+}
