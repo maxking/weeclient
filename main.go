@@ -37,7 +37,7 @@ func main() {
 	}
 
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Printf("Enter password for %v\n>", relay)
+	fmt.Printf("Enter password for %v\n> ", relay)
 	text, _ := reader.ReadString('\n')
 	// TODO: handle error.
 
@@ -87,6 +87,6 @@ func main() {
 		}
 	}()
 
-	client.Start(weechan)
+	client.TviewStart(weechan)
 
 }

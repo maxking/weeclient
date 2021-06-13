@@ -58,7 +58,7 @@ func (wb WeechatBuffer) AddLine(message string) {
 
 // Interface for handler that handles various events.
 type HandleWeechatMessage interface {
-	HandleListBuffers(map[string]WeechatBuffer)
+	HandleListBuffers(map[string]*WeechatBuffer)
 
 	HandleListLines()
 
@@ -77,10 +77,10 @@ func HandleMessage(msg *WeechatMessage, handler HandleWeechatMessage) error {
 	case "listbuffers":
 		// parse out the list of buffers which are Hda objects.
 		bufffers := msg.Object.Value.(WeechatHdaValue)
-		buflist := make(map[string]WeechatBuffer, len(bufffers.Value))
+		buflist := make(map[string]*WeechatBuffer, len(bufffers.Value))
 
 		for _, each := range bufffers.Value {
-			buf := WeechatBuffer{
+			buf := &WeechatBuffer{
 				ShortName: each["short_name"].Value.(string),
 				FullName:  each["full_name"].Value.(string),
 				Title:     each["title"].Value.(string),

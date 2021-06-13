@@ -12,7 +12,7 @@ import (
 )
 
 type WeechatTerminalUI struct {
-	AllBuffers    map[string]weechat.WeechatBuffer
+	AllBuffers    map[string]*weechat.WeechatBuffer
 	CurrentBuffer string
 	grid          *ui.Grid
 	buflist       *widgets.List
@@ -35,7 +35,7 @@ func (w *WeechatTerminalUI) Draw() {
 	ui.Render(w.grid)
 }
 
-func (w *WeechatTerminalUI) UpdateBufferlist(buffers map[string]weechat.WeechatBuffer) {
+func (w *WeechatTerminalUI) UpdateBufferlist(buffers map[string]*weechat.WeechatBuffer) {
 	var buflist []string
 	for _, buf := range buffers {
 		buflist = append(buflist, buf.FullName)
@@ -107,7 +107,7 @@ func Start(weechan chan *weechat.WeechatMessage) {
 	}
 	defer ui.Close()
 
-	allBuffers := make(map[string]weechat.WeechatBuffer)
+	allBuffers := make(map[string]*weechat.WeechatBuffer)
 
 	terminalUi := WeechatTerminalUI{
 		AllBuffers:    allBuffers,
@@ -145,7 +145,7 @@ type TerminalMessageHandler struct {
 	terminalUI *WeechatTerminalUI
 }
 
-func (mh *TerminalMessageHandler) HandleListBuffers(buflist map[string]weechat.WeechatBuffer) {
+func (mh *TerminalMessageHandler) HandleListBuffers(buflist map[string]*weechat.WeechatBuffer) {
 	mh.terminalUI.UpdateBufferlist(buflist)
 	mh.terminalUI.Draw()
 
