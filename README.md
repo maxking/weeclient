@@ -29,18 +29,19 @@ $ ./weeclient
 KeyBindings
 -----------
 
-Buffer list
-~~~~~~~~~~~
+**Buffer list**
 
 - `Ctrl + a`: Move focus to buffer list.
 - `Enter` : When in buffer list, this will move focus to the input box of the buffer.
 
-
-Buffer view
-~~~~~~~~~~~
+**Buffer view**
 
 - `Ctrl + s`: Move focus to the chat and allow scrolling up and down
 - `Ctrl + e`: Move focus to the input box.
+
+**Input box**
+- `Esc`: Clear the box.
+- `Enter`: Send the message in the box.
 
 
 Testing Relay
