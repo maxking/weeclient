@@ -1,10 +1,10 @@
 package weechat
 
-/// Core weechat object. This represents a parsed Core object type.
-/// It doesn't currently capture all the data in a single object
-/// and kinda uses only a single untyped Value fields. In future,
-/// try to figure out something better here that alows optional
-/// fields for specific objects.
+// Core weechat object. This represents a parsed Core object type.
+// It doesn't currently capture all the data in a single object
+// and kinda uses only a single untyped Value fields. In future,
+// try to figure out something better here that alows optional
+// fields for specific objects.
 type WeechatObject struct {
 	ObjType string
 	Value   interface{}
@@ -36,7 +36,7 @@ type WeechatSendMessage struct {
 	Buffer  string
 }
 
-/// Represents a single message from weechat.
+// Represents a single message from weechat.
 type WeechatMessage struct {
 	// Size of the message when recieved including the length (4bytes).
 	Size int

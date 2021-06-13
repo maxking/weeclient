@@ -10,13 +10,13 @@ import (
 	"strings"
 )
 
-/// Protocol represents a parser for Weechat Relay Protocol and essentially
-/// parses messages from here:
-/// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#messages
+// Protocol represents a parser for Weechat Relay Protocol and essentially
+// parses messages from here:
+// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#messages
 type Protocol struct {
 }
 
-/// All the Core Weechat objecct types.
+// All the Core Weechat objecct types.
 const (
 	OBJ_INT = "int"
 	OBJ_CHR = "chr"
@@ -32,8 +32,8 @@ const (
 	OBJ_ARR = "arr"
 )
 
-/// This is the primary Pubic method to decode a single Weechat Message. It
-/// support zlib decompression of the compressed message.
+// This is the primary Pubic method to decode a single Weechat Message. It
+// support zlib decompression of the compressed message.
 func (p *Protocol) Decode(data []byte) (*WeechatMessage, error) {
 	var objType, msgid string
 	msglen, compressed, msgBody, _ := p.parseInitial(data)
@@ -64,8 +64,8 @@ func (p *Protocol) Decode(data []byte) (*WeechatMessage, error) {
 	}, nil
 }
 
-/// Parse the objects as defined in the list here:
-/// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#objects
+// Parse the objects as defined in the list here:
+// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#objects
 func (p *Protocol) parseObject(
 	objType string, data []byte) (WeechatObject, []byte) {
 
@@ -97,7 +97,7 @@ func (p *Protocol) parseObject(
 	}
 }
 
-/// Parse the length of the message body.
+// Parse the length of the message body.
 func (p *Protocol) parseInitial(data []byte) (uint32, bool, []byte, []byte) {
 	len, _ := p.ParseLen(data)
 	compressed := bytes.Equal(data[4:5], []byte{01})
@@ -105,8 +105,8 @@ func (p *Protocol) parseInitial(data []byte) (uint32, bool, []byte, []byte) {
 	return len, compressed, msgBody, data[len:]
 }
 
-/// Parse a single string.
-/// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_string
+// Parse a single string.
+// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_string
 func (p *Protocol) ParseString(data []byte) (string, []byte) {
 	var len uint32
 	len, data = p.ParseLen(data)
@@ -118,33 +118,33 @@ func (p *Protocol) ParseString(data []byte) (string, []byte) {
 	return string(data[:len]), data[len:]
 }
 
-/// Parse a single string.
-/// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_string
+// Parse a single string.
+// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_string
 func (p *Protocol) parseStr(data []byte) (WeechatObject, []byte) {
 	var strval string
 	strval, data = p.ParseString(data)
 	return WeechatObject{OBJ_STR, strval}, data
 }
 
-/// Parse a 3 letter object type, usually one of:
-/// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#objects
-/// There is currently no check built to handle object types we don't know
-/// about and it will essentially end up panic in parseObject if an unknown
-/// type is passed to it.
+// Parse a 3 letter object type, usually one of:
+// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#objects
+// There is currently no check built to handle object types we don't know
+// about and it will essentially end up panic in parseObject if an unknown
+// type is passed to it.
 func (p *Protocol) parseType(data []byte) (string, []byte) {
 	return string(data[:3]), data[3:]
 }
 
-/// Parse the length of a string/message/anything. Just a
-/// proxy for parseInt.
+// Parse the length of a string/message/anything. Just a
+// proxy for parseInt.
 func (p *Protocol) ParseLen(data []byte) (uint32, []byte) {
 	var val WeechatObject
 	val, data = p.parseInt(data)
 	return val.Value.(uint32), data
 }
 
-/// Parse 4 byte signed Integer.
-/// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_integer
+// Parse 4 byte signed Integer.
+// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_integer
 func (p *Protocol) parseInt(data []byte) (WeechatObject, []byte) {
 	if len(data) < 4 {
 		return WeechatObject{OBJ_INT, 0}, data
@@ -154,9 +154,9 @@ func (p *Protocol) parseInt(data []byte) (WeechatObject, []byte) {
 	return WeechatObject{OBJ_INT, len}, data[4:]
 }
 
-/// Parse time, which is essentially a string with a 1 byte length
-/// in the start.
-/// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_time
+// Parse time, which is essentially a string with a 1 byte length
+// in the start.
+// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_time
 func (p *Protocol) parseTime(data []byte) (WeechatObject, []byte) {
 	var pointer WeechatObject
 	pointer, data = p.parsePointer(data)
@@ -164,15 +164,15 @@ func (p *Protocol) parseTime(data []byte) (WeechatObject, []byte) {
 	return pointer, data
 }
 
-/// Parse a single character of length 1 byte.
-/// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_char
+// Parse a single character of length 1 byte.
+// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_char
 func (p *Protocol) parseChar(data []byte) (WeechatObject, []byte) {
 	return WeechatObject{OBJ_CHR, string(data[0])}, data[1:]
 }
 
-/// Parse a hash table datatype. It starts with two Type (3byte) (key type, value type)
-/// and then the count (4 byte integer) and then count number of key value pairs.
-/// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_hashtable
+// Parse a hash table datatype. It starts with two Type (3byte) (key type, value type)
+// and then the count (4 byte integer) and then count number of key value pairs.
+// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_hashtable
 func (p *Protocol) parseHashTable(data []byte) (WeechatObject, []byte) {
 	var key_type, value_type string
 	var count uint32
@@ -193,9 +193,9 @@ func (p *Protocol) parseHashTable(data []byte) (WeechatObject, []byte) {
 	return WeechatObject{OBJ_HTB, hashtable}, data
 }
 
-/// Parse an array. Objects of a single type.
-/// 3 bytes Type, 4 byte count (integer) and then count number of objects.
-/// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_array
+// Parse an array. Objects of a single type.
+// 3 bytes Type, 4 byte count (integer) and then count number of objects.
+// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_array
 func (p *Protocol) parseArray(data []byte) (WeechatObject, []byte) {
 	var objType string
 	var count uint32
@@ -214,9 +214,9 @@ func (p *Protocol) parseArray(data []byte) (WeechatObject, []byte) {
 	return WeechatObject{OBJ_ARR, arr}, data
 }
 
-/// Parse Infolist, which is a list of key-value pairs with key type string and
-/// arbitrary value type.
-/// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_infolist
+// Parse Infolist, which is a list of key-value pairs with key type string and
+// arbitrary value type.
+// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_infolist
 func (p *Protocol) parseInfoListContent(data []byte) (WeechatObject, []byte) {
 	var count uint32
 	var objType, key string
@@ -242,8 +242,8 @@ func (p *Protocol) parseInfoListContent(data []byte) (WeechatObject, []byte) {
 	return WeechatObject{OBJ_INL, infolist}, data
 }
 
-/// Parse Info, which is essentially a key-value pair of type string.
-/// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_info
+// Parse Info, which is essentially a key-value pair of type string.
+// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_info
 func (p *Protocol) parseInfo(data []byte) (WeechatObject, []byte) {
 	info := make(map[string]string)
 	var key, value string
@@ -256,9 +256,9 @@ func (p *Protocol) parseInfo(data []byte) (WeechatObject, []byte) {
 	return WeechatObject{OBJ_INF, info}, data
 }
 
-/// Parse Long integer, which is essentially parsed like a Pointer,
-/// single byt length and then string.
-/// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_long_integer
+// Parse Long integer, which is essentially parsed like a Pointer,
+// single byt length and then string.
+// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_long_integer
 func (p *Protocol) parseLongInt(data []byte) (WeechatObject, []byte) {
 	var pointer WeechatObject
 	pointer, data = p.parsePointer(data)
@@ -266,9 +266,9 @@ func (p *Protocol) parseLongInt(data []byte) (WeechatObject, []byte) {
 	return pointer, data
 }
 
-/// Parse hdata. This is the most complex data structure to be
-/// parsed so just read the explanation in docs.
-/// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_hdata
+// Parse hdata. This is the most complex data structure to be
+// parsed so just read the explanation in docs.
+// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_hdata
 func (p *Protocol) parseHda(data []byte) (WeechatObject, []byte) {
 	// fmt.Println("========= Parsing object: hda ========")
 	var hpath, keys string
@@ -325,7 +325,7 @@ func (p *Protocol) parseHda(data []byte) (WeechatObject, []byte) {
 	return WeechatObject{OBJ_HDA, WeechatHdaValue{Value: hda, Hpath: hpath}}, remaining
 }
 
-/// Parse count number of pointers. Not an actual datatype.
+// Parse count number of pointers. Not an actual datatype.
 func (p *Protocol) parsePointers(count int, data []byte) ([]string, []byte) {
 	pointers := make([]string, count)
 	var pointer WeechatObject
@@ -337,15 +337,15 @@ func (p *Protocol) parsePointers(count int, data []byte) ([]string, []byte) {
 	return pointers, data
 }
 
-/// Parse a single byte integer, used to denote length of
-/// pointer or long integer. Not an actual datatype.
+// Parse a single byte integer, used to denote length of
+// pointer or long integer. Not an actual datatype.
 func (p *Protocol) parseSmallint(data []byte) int {
 	return int(data[0])
 }
 
-/// Parse a single pointer. Single byte length and then length
-/// long string.
-/// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_pointer
+// Parse a single pointer. Single byte length and then length
+// long string.
+// https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_pointer
 func (p *Protocol) parsePointer(data []byte) (WeechatObject, []byte) {
 	len := p.parseSmallint(data)
 	if len == 0 {
