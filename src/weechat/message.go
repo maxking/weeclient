@@ -10,6 +10,26 @@ type WeechatObject struct {
 	Value   interface{}
 }
 
+// Coerce the value to string. Only handles string types for now.
+func (o WeechatObject) as_string() string {
+	return o.Value.(string)
+
+	// switch o.ObjType {
+	// case OBJ_STR:
+	// 	return o.Value.(string)
+	// default:
+	// 	return "Invalid string coercion of Weechat obj"
+	// }
+}
+
+func (o WeechatObject) as_int() uint32 {
+	return o.Value.(uint32)
+}
+
+func (o WeechatObject) as_bool() bool {
+	return o.Value.(uint32) == 0
+}
+
 /// Represents a single message from weechat.
 type WeechatMessage struct {
 	// Size of the message when recieved including the length (4bytes).
@@ -52,6 +72,20 @@ type WeechatBuffer struct {
 	Path      string
 }
 
+// All the information about a new line.
+type WeechatLine struct {
+	// Path of the buffer.
+	Buffer      string
+	Date        string
+	DatePrinted string
+	Displayed   bool
+	NotifyLevel int
+	Highlight   bool
+	Tags        []string
+	Prefix      string
+	Message     string
+}
+
 func (wb WeechatBuffer) AddLine(message string) {
 	wb.Lines = append(wb.Lines, message)
 }
@@ -64,7 +98,7 @@ type HandleWeechatMessage interface {
 
 	HandleNickList()
 
-	HandleLineAdded(string, string)
+	HandleLineAdded(*WeechatLine)
 
 	Default(*WeechatMessage)
 }
@@ -96,17 +130,19 @@ func HandleMessage(msg *WeechatMessage, handler HandleWeechatMessage) error {
 
 		handler.HandleListBuffers(buflist)
 
-	case "listlines":
-		// handle list of lines in each buffer.
+	case "_buffer_line_added", "listlines":
 		for _, each := range msg.Object.Value.(WeechatHdaValue).Value {
-			handler.HandleLineAdded(each["buffer"].Value.(string), each["message"].Value.(string))
-
-			// fmt.Printf("---\nbuffer = %v message = %v \n---\n", each["buffer"], each["message"])
-		}
-		handler.HandleListLines()
-	case "_buffer_line_added":
-		for _, each := range msg.Object.Value.(WeechatHdaValue).Value {
-			handler.HandleLineAdded(each["buffer"].Value.(string), each["message"].Value.(string))
+			line := WeechatLine{
+				Buffer:  each["buffer"].as_string(),
+				Message: each["message"].as_string(),
+				Date:    each["date"].as_string(),
+				// DatePrinted: each["date_printed"].as_string(),
+				// Displayed:   each["displayed"].as_bool(),
+				// NotifyLevel: each["notify_level"].as_int(),
+				// Highlight: each["highlight"].as_bool(),
+				Prefix: each["prefix"].as_string(),
+			}
+			handler.HandleLineAdded(&line)
 		}
 		handler.HandleListLines()
 		// add the lines to a buffer.

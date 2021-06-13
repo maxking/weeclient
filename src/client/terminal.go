@@ -159,10 +159,10 @@ func (mh *TerminalMessageHandler) HandleNickList() {
 
 }
 
-func (mh *TerminalMessageHandler) HandleLineAdded(buffer string, message string) {
-	mh.terminalUI.AddLine(buffer, message)
+func (mh *TerminalMessageHandler) HandleLineAdded(line *weechat.WeechatLine) {
+	mh.terminalUI.AddLine(line.Buffer, line.Message)
 	mh.terminalUI.buffer.Text = fmt.Sprintf("%v\n%v : %v",
-		mh.terminalUI.buffer.Text, mh.terminalUI.GetBufferShortname(buffer), message)
+		mh.terminalUI.buffer.Text, mh.terminalUI.GetBufferShortname(line.Buffer), line.Message)
 
 }
 

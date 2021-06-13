@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/maxking/weeclient/src/weechat"
@@ -53,6 +54,7 @@ func (tv *TerminalView) SetCurrentBuffer(index int, mainText, secondaryText stri
 		}
 		// Then, switch to the page that is embedding the above buffer widget.
 		tv.pages.SwitchToPage(fmt.Sprintf("page-%v", mainText))
+		// tv.app.SetFocus(tv.pages)
 	}
 }
 
@@ -90,12 +92,12 @@ func (tv *TerminalView) HandleNickList() {
 
 }
 
-func (tv *TerminalView) HandleLineAdded(buffer, message string) {
-	buf := tv.bufferList.Buffers[buffer]
-	buf.Lines = append(buf.Lines, message)
+func (tv *TerminalView) HandleLineAdded(line *weechat.WeechatLine) {
+	buf := tv.bufferList.Buffers[line.Buffer]
+	buf.Lines = append(buf.Lines, line.Message)
 	// Also, add the message to the current view.
 	if bufView, ok := tv.buffers[buf.FullName]; ok {
-		bufView.Write([]byte("\n" + message))
+		bufView.Write([]byte(fmt.Sprintf("\n[%v] <%v>: %v", line.Date, line.Prefix, line.Message)))
 	}
 }
 
@@ -105,7 +107,6 @@ func (tv *TerminalView) Default(msg *weechat.WeechatMessage) {
 
 func TviewStart(weechan chan *weechat.WeechatMessage) {
 	app := tview.NewApplication()
-
 	bufffers := make(map[string]*weechat.WeechatBuffer)
 	buflist := NewBufferListWidget(bufffers)
 	bufferspage := tview.NewPages()
@@ -128,6 +129,8 @@ func TviewStart(weechan chan *weechat.WeechatMessage) {
 	}()
 
 	if err := view.app.SetRoot(grid, true).SetFocus(grid).Run(); err != nil {
-		panic(err)
+		// panic(err)
+		fmt.Println(fmt.Errorf("Error from the application: %v", err))
+		os.Exit(1)
 	}
 }
