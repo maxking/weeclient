@@ -12,6 +12,13 @@ import (
 	"github.com/rivo/tview"
 )
 
+const (
+	titleColor   = "red"
+	defaultColor = "white"
+	timeColor    = "green"
+	msgColor     = "yellow"
+)
+
 type Buffer struct {
 	*weechat.WeechatBuffer
 	Chat  *tview.TextView
@@ -90,8 +97,8 @@ func (tv *TerminalView) HandleBufferOpened(ptr string, buf *weechat.WeechatBuffe
 		SetTextAlign(tview.AlignLeft).
 		SetWordWrap(true).
 		SetDynamicColors(true).
-		SetText(fmt.Sprintf("[%v] %v\n-----\n%v",
-			buf.FullName, buf.Title, strings.Join(buf.Lines, "\n")))
+		SetText(fmt.Sprintf("[%v][%v] %v\n-----[%v]\n%v", titleColor,
+			buf.FullName, buf.Title, defaultColor, strings.Join(buf.Lines, "\n")))
 
 	input := tview.NewInputField().
 		SetFieldBackgroundColor(tcell.ColorGray).
@@ -161,8 +168,8 @@ func (tv *TerminalView) HandleLineAdded(line *weechat.WeechatLine) {
 		secs, _ := strconv.ParseInt(line.Date, 10, 64)
 		unixtime := time.Unix(secs, 0)
 		bufView.Write([]byte(
-			fmt.Sprintf("\n[%v:%v] <%v>: %v", unixtime.Hour(),
-				unixtime.Minute(), line.Prefix, line.Message)))
+			fmt.Sprintf("\n[%v][%v:%v] [%v] <%v>: %v[%v]",
+				timeColor, unixtime.Hour(), unixtime.Minute(), msgColor, line.Prefix, line.Message, defaultColor)))
 	}
 }
 
