@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gdamore/tcell/v2"
+	"github.com/maxking/weeclient/src/color"
 	"github.com/maxking/weeclient/src/weechat"
 	"github.com/rivo/tview"
 )
@@ -28,7 +29,7 @@ func (tv *TerminalView) HandleListBuffers(buflist map[string]*weechat.WeechatBuf
 // startup when the application boots up.
 func (tv *TerminalView) HandleBufferOpened(ptr string, buf *weechat.WeechatBuffer) {
 	// Add a new item to the List widget.
-	tv.bufferList.List.AddItem(fmt.Sprintf("[grey]%v[white]", buf.FullName), buf.FullName, 0, nil)
+	tv.bufferList.List.AddItem(fmt.Sprintf("%v", buf.FullName), buf.FullName, 0, nil)
 
 	// Create views for the main chat buffer.
 	bufferView := tview.NewTextView().
@@ -100,7 +101,7 @@ func (tv *TerminalView) HandleBufferOpened(ptr string, buf *weechat.WeechatBuffe
 		layout,
 		true,
 		// Only the core.weechat buffer is visible at first.
-		false,
+		buffer.FullName == "core.weechat",
 	)
 
 	tv.buffers[buf.FullName] = bufferView
@@ -120,7 +121,7 @@ func (tv *TerminalView) HandleLineAdded(line *weechat.WeechatLine) {
 		unixtime := time.Unix(secs, 0)
 		bufView.Write([]byte(
 			fmt.Sprintf("\n[%v][%v:%v] [%v] <%v>: %v[%v]",
-				timeColor, unixtime.Hour(), unixtime.Minute(), msgColor, line.Prefix, line.Message, defaultColor)))
+				timeColor, unixtime.Hour(), unixtime.Minute(), msgColor, line.Prefix, color.StripWeechatColors(line.Message, color.Upper), defaultColor)))
 	}
 }
 

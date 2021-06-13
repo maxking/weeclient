@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/gdamore/tcell/v2"
+	"github.com/maxking/weeclient/src/color"
 	"github.com/maxking/weeclient/src/weechat"
 	"github.com/rivo/tview"
 )
@@ -34,7 +35,9 @@ func (tv *TerminalView) SetCurrentBuffer(index int, mainText, secondaryText stri
 		// For the buffer widget, set the right number of lines.
 		if bufView, ok := tv.buffers[buf.FullName]; ok {
 			bufView.SetText((fmt.Sprintf("[%v] [%v] %v\n-----\n%v [%v]",
-				msgColor, buf.FullName, buf.Title, strings.Join(buf.Lines, "\n"), defaultColor)))
+				msgColor, buf.FullName, buf.Title,
+				color.StripWeechatColors(strings.Join(buf.Lines, "\n"), color.Upper),
+				defaultColor)))
 		}
 		// Then, switch to the page that is embedding the above buffer widget.
 		tv.pages.SwitchToPage(fmt.Sprintf("page-%v", mainText))

@@ -3,6 +3,7 @@ package color
 import (
 	"fmt"
 	"regexp"
+	"strings"
 )
 
 var Reset = "\033[0m"
@@ -30,7 +31,11 @@ var (
 	ColorsRe    = fmt.Sprintf(`(\x19(?:\d{2}|F%v|B\d{2}|B@\d{5}|E|\\*%v(,%v)?|@\d{5}|b.|\x1C))|\x1A.|\x1B.|\x1C`, ColorsAny, ColorsAny, ColorsAny)
 )
 
-func StripWeechatColors(with_color string) string {
+func StripWeechatColors(with_color string, replacefunc func(string) string) string {
 	re := regexp.MustCompile(ColorsRe)
 	return re.ReplaceAllString(with_color, "")
+}
+
+func Upper(in string) string {
+	return strings.ToUpper(in)
 }
