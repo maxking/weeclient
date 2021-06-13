@@ -61,7 +61,8 @@ func (tv *TerminalView) SetCurrentBuffer(index int, mainText, secondaryText stri
 	if buf != nil {
 		// For the buffer widget, set the right number of lines.
 		if bufView, ok := tv.buffers[buf.FullName]; ok {
-			bufView.SetText((fmt.Sprintf("[%v] %v\n-----\n%v", buf.FullName, buf.Title, strings.Join(buf.Lines, "\n"))))
+			bufView.SetText((fmt.Sprintf("[%v] %v\n-----\n%v",
+				buf.FullName, buf.Title, strings.Join(buf.Lines, "\n"))))
 		}
 		// Then, switch to the page that is embedding the above buffer widget.
 		tv.pages.SwitchToPage(fmt.Sprintf("page-%v", mainText))
@@ -126,6 +127,17 @@ func (tv *TerminalView) HandleBufferOpened(ptr string, buf *weechat.WeechatBuffe
 
 	bufferView.SetTitle(buf.FullName)
 	bufferView.SetChangedFunc(func() { tv.app.Draw() })
+
+	// Add keybindings to switch between input and chat for focus.
+	layout.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		switch event.Key() {
+		case tcell.KeyCtrlS:
+			tv.app.SetFocus(bufferView)
+		case tcell.KeyCtrlE:
+			tv.app.SetFocus(input)
+		}
+		return event
+	})
 
 	tv.pages.AddPage(fmt.Sprintf("page-%v", buf.FullName),
 		layout,

@@ -27,7 +27,7 @@ func (o WeechatObject) as_int() uint32 {
 }
 
 func (o WeechatObject) as_bool() bool {
-	return o.Value.(uint32) == 0
+	return o.Value == '0'
 }
 
 /// Represents a single message from weechat.
@@ -135,10 +135,10 @@ func HandleMessage(msg *WeechatMessage, handler HandleWeechatMessage) error {
 				Message: each["message"].as_string(),
 				Date:    each["date"].as_string(),
 				// DatePrinted: each["date_printed"].as_string(),
-				// Displayed:   each["displayed"].as_bool(),
+				Displayed: each["displayed"].as_bool(),
 				// NotifyLevel: each["notify_level"].as_int(),
-				// Highlight: each["highlight"].as_bool(),
-				Prefix: each["prefix"].as_string(),
+				Highlight: each["highlight"].as_bool(),
+				Prefix:    each["prefix"].as_string(),
 			}
 			handler.HandleLineAdded(&line)
 		}
