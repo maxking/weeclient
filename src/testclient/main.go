@@ -23,16 +23,20 @@ sync
 `
 )
 
-const relay = "localhost:8080"
+// var relay = "localhost:8080"
 
 func main() {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Printf("Relay \n> ")
+	relay, _ := reader.ReadString('\n')
+	relay = strings.TrimSuffix(relay, "\n")
+
 	conn, err := net.Dial("tcp", relay)
 	if err != nil {
 		fmt.Printf("Failed to connect to remote relay at %v: %v\n", relay, err)
 		os.Exit(1)
 	}
 
-	reader := bufio.NewReader(os.Stdin)
 	fmt.Printf("Enter password for %v\n> ", relay)
 	text, _ := reader.ReadString('\n')
 	// TODO: handle error.
