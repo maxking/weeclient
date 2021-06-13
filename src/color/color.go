@@ -3,7 +3,6 @@ package color
 import (
 	"fmt"
 	"regexp"
-	"strings"
 )
 
 var Reset = "\033[0m"
@@ -24,18 +23,38 @@ func RemoveColor(with_color string) string {
 }
 
 var (
+	// Mostly copied verbatim from qweechat.
+	// https://github.com/weechat/qweechat/blob/master/qweechat/weechat/color.py#L25
 	ColorsRegex = `[*!/_]*`
 	ColorsStd   = fmt.Sprintf(`(?:%s\d{2})`, ColorsRegex)
 	ColorsExt   = fmt.Sprintf(`(?:@%v\d{5})`, ColorsRegex)
 	ColorsAny   = fmt.Sprintf(`(?:%s|%s)`, ColorsStd, ColorsExt)
-	ColorsRe    = fmt.Sprintf(`(\x19(?:\d{2}|F%v|B\d{2}|B@\d{5}|E|\\*%v(,%v)?|@\d{5}|b.|\x1C))|\x1A.|\x1B.|\x1C`, ColorsAny, ColorsAny, ColorsAny)
+	ColorsRe    = fmt.Sprintf(
+		`(\x19(?:\d{2}|F%v|B\d{2}|B@\d{5}|E|\\*%v(,%v)?|@\d{5}|b.|\x1C))|\x1A.|\x1B.|\x1C`,
+		ColorsAny, ColorsAny, ColorsAny)
 )
 
+// Replace the weechat colors parsed using regex and use the replaceFund to
+// find substituations.
 func StripWeechatColors(with_color string, replacefunc func(string) string) string {
 	re := regexp.MustCompile(ColorsRe)
-	return re.ReplaceAllString(with_color, "")
+	return re.ReplaceAllStringFunc(with_color, replacefunc)
 }
 
-func Upper(in string) string {
-	return strings.ToUpper(in)
+// When fully implemented, will replace weechat colors with colors that
+// tview understands. Currently, not in a functional state.
+func Colorize(in string) string {
+	switch in[0] {
+	case '\x19':
+		switch in[1] {
+		case 'b':
+			return ""
+		case '\x1C':
+			return "\x01(Fr)\x01(Br)"
+		default:
+			return ""
+		}
+	default:
+		return ""
+	}
 }

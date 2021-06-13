@@ -121,7 +121,7 @@ func (tv *TerminalView) HandleLineAdded(line *weechat.WeechatLine) {
 		unixtime := time.Unix(secs, 0)
 		bufView.Write([]byte(
 			fmt.Sprintf("\n[%v][%v:%v] [%v] <%v>: %v[%v]",
-				timeColor, unixtime.Hour(), unixtime.Minute(), msgColor, line.Prefix, color.StripWeechatColors(line.Message, color.Upper), defaultColor)))
+				timeColor, unixtime.Hour(), unixtime.Minute(), msgColor, line.Prefix, color.StripWeechatColors(line.Message, color.Colorize), defaultColor)))
 	}
 }
 
