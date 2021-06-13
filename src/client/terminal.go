@@ -155,7 +155,7 @@ func (mh *TerminalMessageHandler) HandleListLines() {
 	mh.terminalUI.Draw()
 }
 
-func (mh *TerminalMessageHandler) HandleNickList() {
+func (mh *TerminalMessageHandler) HandleNickList(msg *weechat.WeechatMessage) {
 
 }
 

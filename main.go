@@ -62,6 +62,8 @@ func main() {
 
 	weechan := make(chan *weechat.WeechatMessage)
 
+	// sendchan := make(chan []bytes)
+
 	go func() {
 		for {
 			// first, read the length of the next message and block on
@@ -86,6 +88,8 @@ func main() {
 			}
 		}
 	}()
+
+	// handle sending of message.
 
 	client.TviewStart(weechan)
 
