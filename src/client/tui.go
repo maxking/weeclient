@@ -91,7 +91,7 @@ func (tv *TerminalView) HandleListBuffers(buflist map[string]*weechat.WeechatBuf
 }
 
 func (tv *TerminalView) HandleBufferOpened(ptr string, buf *weechat.WeechatBuffer) {
-	tv.bufferList.List.AddItem(buf.FullName, "", 0, nil)
+	tv.bufferList.List.AddItem(fmt.Sprintf("[grey]%v[%v]", buf.FullName, defaultColor), "", 0, nil)
 
 	bufferView := tview.NewTextView().
 		SetTextAlign(tview.AlignLeft).
