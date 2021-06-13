@@ -12,7 +12,8 @@ const (
 	TimeColor    = "green"
 	MsgColor     = "yellow"
 	ChatColor    = "grey"
-	ChanColor    = "yellow"
+	ChanColor    = "blue"
+	NickColor    = "pink"
 )
 
 var Reset = "\033[0m"

@@ -16,7 +16,7 @@ import (
 const (
 	authCommand    = `init password=%v`
 	initialCommand = `(listbuffers) hdata buffer:gui_buffers(*) number,full_name,short_name,type,nicklist,title,local_variables,
-(listlines) hdata buffer:gui_buffers(*)/own_lines/last_line(-%(lines)d)/data date,displayed,prefix,message,buffer
+(listlines) hdata buffer:gui_buffers(*)/own_lines/last_line(-15)/data date,displayed,prefix,message,buffer
 (nicklist) nicklist
 sync
 `

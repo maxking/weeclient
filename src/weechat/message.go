@@ -129,10 +129,10 @@ func (l *WeechatLine) ToString(shouldColor bool) string {
 		// https://pkg.go.dev/github.com/rivo/tview@v0.0.0-20210608105643-d4fb0348227b?utm_source=gopls#hdr-Colors
 		re := regexp.MustCompile(`\]`)
 		msg := string(re.ReplaceAll([]byte(l.Message), []byte("[]")))
-		return fmt.Sprintf("\n[%v][%v:%v] [%v] %v: %v[%v]",
+		return fmt.Sprintf("[%v][%v:%v] [%v] %v: [%v] %v[%v]",
 			color.TimeColor, l.Date.Hour(), l.Date.Minute(),
-			color.MsgColor, l.Prefix,
-			color.ReplaceWeechatColors(msg, color.Colorize),
+			color.NickColor, l.Prefix,
+			color.MsgColor, color.ReplaceWeechatColors(msg, color.Colorize),
 			color.DefaultColor)
 	}
 	return fmt.Sprintf("[%v:%v] %v: %v",
