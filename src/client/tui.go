@@ -133,7 +133,7 @@ func (tv *TerminalView) HandleBufferOpened(ptr string, buf *weechat.WeechatBuffe
 		switch event.Key() {
 		case tcell.KeyCtrlS:
 			tv.app.SetFocus(bufferView)
-		case tcell.KeyCtrlE:
+		case tcell.KeyCtrlI:
 			tv.app.SetFocus(input)
 		}
 		return event
@@ -198,7 +198,7 @@ func TviewStart(
 
 	// Set keybindings to move the focus back to buffer list.
 	view.app.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Key() == tcell.KeyCtrlA {
+		if event.Key() == tcell.KeyCtrlB {
 			view.app.SetFocus(view.bufferList.List)
 		}
 		return event

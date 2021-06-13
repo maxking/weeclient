@@ -30,6 +30,12 @@ func (o WeechatObject) as_bool() bool {
 	return o.Value == '0'
 }
 
+// Object representing information needed to be sent.
+type WeechatSendMessage struct {
+	Message string
+	Buffer  string
+}
+
 /// Represents a single message from weechat.
 type WeechatMessage struct {
 	// Size of the message when recieved including the length (4bytes).
@@ -150,9 +156,4 @@ func HandleMessage(msg *WeechatMessage, handler HandleWeechatMessage) error {
 		handler.Default(msg)
 	}
 	return nil
-}
-
-type WeechatSendMessage struct {
-	Message string
-	Buffer  string
 }
