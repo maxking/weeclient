@@ -10,7 +10,7 @@ const (
 	TitleColor   = "red"
 	DefaultColor = "white"
 	TimeColor    = "green"
-	MsgColor     = "yellow"
+	MsgColor     = "white"
 	ChatColor    = "grey"
 	ChanColor    = "blue"
 	NickColor    = "pink"

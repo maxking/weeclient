@@ -81,7 +81,7 @@ type WeechatBuffer struct {
 	Lines     []*WeechatLine
 	ShortName string
 	FullName  string
-	Number    uint32
+	Number    int32
 	Title     string
 	LocalVars map[WeechatObject]WeechatObject
 	Path      string

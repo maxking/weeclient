@@ -50,6 +50,13 @@ func (p *Protocol) Decode(data []byte) (*WeechatMessage, error) {
 	}
 	msgid, msgBody = p.ParseString(msgBody)
 	objType, msgBody = p.parseType(msgBody)
+	// Handle error in parsing the msgBody.
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("Failed to parse the object of type %v\n", objType)
+		}
+	}()
+
 	obj, _ := p.parseObject(objType, msgBody)
 	// fmt.Printf("Total size: %v\nCompression: %v\nId: %v\nType: %v\n======\n",
 	// 	msglen, compressed, msgid, objType)
@@ -69,35 +76,37 @@ func (p *Protocol) parseObject(
 	objType string, data []byte) (WeechatObject, []byte) {
 
 	switch objType {
-	case OBJ_HDA:
-		return p.parseHda(data)
-	case OBJ_TIM:
-		return p.parseTime(data)
 	case OBJ_CHR:
 		return p.parseChar(data)
-	case OBJ_STR:
-		return p.parseStr(data)
 	case OBJ_INT:
 		return p.parseInt(data)
+	case OBJ_LON:
+		return p.parseLongInt(data)
+	case OBJ_STR:
+		return p.parseStr(data)
+	case OBJ_BUF:
+		return p.parseStr(data)
+	case OBJ_PTR:
+		return p.parsePointer(data)
+	case OBJ_TIM:
+		return p.parseTime(data)
 	case OBJ_HTB:
 		return p.parseHashTable(data)
+	case OBJ_HDA:
+		return p.parseHda(data)		
 	case OBJ_ARR:
 		return p.parseArray(data)
 	case OBJ_INF:
 		return p.parseInfo(data)
 	case OBJ_INL:
 		return p.parseInfoListContent(data)
-	case OBJ_LON:
-		return p.parseLongInt(data)
-	case OBJ_PTR:
-		return p.parsePointer(data)
 	default:
 		panic(fmt.Errorf("parsing of type %v is not implemented yet", objType))
 	}
 }
 
 // Parse the length of the message body.
-func (p *Protocol) parseInitial(data []byte) (uint32, bool, []byte, []byte) {
+func (p *Protocol) parseInitial(data []byte) (int32, bool, []byte, []byte) {
 	len, _ := p.ParseLen(data)
 	compressed := bytes.Equal(data[4:5], []byte{01})
 	msgBody := data[5:len]
@@ -107,14 +116,21 @@ func (p *Protocol) parseInitial(data []byte) (uint32, bool, []byte, []byte) {
 // Parse a single string.
 // https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_string
 func (p *Protocol) ParseString(data []byte) (string, []byte) {
-	var len uint32
-	len, data = p.ParseLen(data)
+	var length int32
+	length, data = p.ParseLen(data)
 	// 2147483647 is the value for int_max in 4byte singed integer.
-	if len <= 0 || len >= 2147483647 {
+	if length >= 2147483647 {
+		// panic(fmt.Sprintf("Found length larger than int_max %v", length))
+		return "", data
+	} else if length <= 0 {
+		// panic(fmt.Sprintf("Found negative length %v", length))
 		return "", data
 	}
+	if int(length) > len(data) {
+		panic(fmt.Sprintf("Found string length larger than the data, length: %v data len: %v", length, len(data)))
+	}
 	// fmt.Printf("Length of string: %v value: %v\n", len, str)
-	return string(data[:len]), data[len:]
+	return string(data[:length]), data[length:]
 }
 
 // Parse a single string.
@@ -136,10 +152,10 @@ func (p *Protocol) parseType(data []byte) (string, []byte) {
 
 // Parse the length of a string/message/anything. Just a
 // proxy for parseInt.
-func (p *Protocol) ParseLen(data []byte) (uint32, []byte) {
+func (p *Protocol) ParseLen(data []byte) (int32, []byte) {
 	var val WeechatObject
 	val, data = p.parseInt(data)
-	return val.Value.(uint32), data
+	return val.Value.(int32), data
 }
 
 // Parse 4 byte signed Integer.
@@ -150,7 +166,7 @@ func (p *Protocol) parseInt(data []byte) (WeechatObject, []byte) {
 	}
 	len := binary.BigEndian.Uint32(data[:4])
 	// fmt.Printf("Parsed int of value: %v\n", len)
-	return WeechatObject{OBJ_INT, len}, data[4:]
+	return WeechatObject{OBJ_INT, int32(len)}, data[4:]
 }
 
 // Parse time, which is essentially a string with a 1 byte length
@@ -174,7 +190,7 @@ func (p *Protocol) parseChar(data []byte) (WeechatObject, []byte) {
 // https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_hashtable
 func (p *Protocol) parseHashTable(data []byte) (WeechatObject, []byte) {
 	var key_type, value_type string
-	var count uint32
+	var count int32
 	key_type, data = p.parseType(data)
 	value_type, data = p.parseType(data)
 	count, data = p.ParseLen(data)
@@ -197,7 +213,7 @@ func (p *Protocol) parseHashTable(data []byte) (WeechatObject, []byte) {
 // https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_array
 func (p *Protocol) parseArray(data []byte) (WeechatObject, []byte) {
 	var objType string
-	var count uint32
+	var count int32
 	var value WeechatObject
 	// parse the type of the objects in the array.
 	objType, data = p.parseType(data)
@@ -217,7 +233,7 @@ func (p *Protocol) parseArray(data []byte) (WeechatObject, []byte) {
 // arbitrary value type.
 // https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_infolist
 func (p *Protocol) parseInfoListContent(data []byte) (WeechatObject, []byte) {
-	var count uint32
+	var count int32
 	var objType, key string
 	var value WeechatObject
 	// parse name
@@ -272,7 +288,7 @@ func (p *Protocol) parseHda(data []byte) (WeechatObject, []byte) {
 	// fmt.Println("========= Parsing object: hda ========")
 	var hpath, keys string
 	var remaining []byte
-	var count uint32
+	var count int32
 	// Parse the hpath.
 	hpath, remaining = p.ParseString(data)
 	// parse the keys.

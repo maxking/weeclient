@@ -1,6 +1,7 @@
 package weechat
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -20,6 +21,12 @@ type HandleWeechatMessage interface {
 // level UI functions. It expects an interface which handles parsed structured
 // output.
 func HandleMessage(msg *WeechatMessage, handler HandleWeechatMessage) error {
+	// Got an empty message, simply don't process it for now. We can figure
+	// out how to handle this.
+	if msg == nil {
+		fmt.Printf("Got Nil message to handle.\n")
+		return nil
+	}
 	switch msg.Msgid {
 	case "listbuffers", "_buffer_opened":
 		// parse out the list of buffers which are Hda objects.
@@ -31,7 +38,7 @@ func HandleMessage(msg *WeechatMessage, handler HandleWeechatMessage) error {
 				ShortName: each["short_name"].Value.(string),
 				FullName:  each["full_name"].Value.(string),
 				Title:     each["title"].Value.(string),
-				Number:    each["number"].Value.(uint32),
+				Number:    each["number"].Value.(int32),
 				LocalVars: each["local_variables"].Value.(map[WeechatObject]WeechatObject),
 				Lines:     make([]*WeechatLine, 0),
 				// this is essentially a list of strings, pointers,
