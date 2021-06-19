@@ -77,6 +77,19 @@ type WeechatHdaValue struct {
 	Hpath string
 }
 
+func (hda WeechatHdaValue) DebugPrint() string {
+	var output string = ""
+	output += fmt.Sprintf("hpath: %v\n", hda.Hpath)
+	for i, dict := range hda.Value {
+		output += fmt.Sprintf("item: %v\n", i)
+		for key, value := range dict {
+			output += fmt.Sprintf("\t %v : %v\n", key, value)
+		}
+	}
+
+	return output
+}
+
 type WeechatBuffer struct {
 	Lines     []*WeechatLine
 	ShortName string

@@ -119,6 +119,9 @@ func (tv *TerminalView) HandleLineAdded(line *weechat.WeechatLine) {
 // Default handler which handles all the unhandled messages.
 func (tv *TerminalView) Default(msg *weechat.WeechatMessage) {
 	tv.Debug(fmt.Sprintf("Uhandled message of type: %v\n", msg.Msgid))
+	if msg.Type == weechat.OBJ_HDA {
+		tv.Debug(msg.Object.Value.(weechat.WeechatHdaValue).DebugPrint())
+	}
 }
 
 // DebugPrint will create a new "debug" buffer and write messages to it.
