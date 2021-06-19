@@ -118,16 +118,21 @@ func (tv *TerminalView) HandleLineAdded(line *weechat.WeechatLine) {
 
 // Default handler which handles all the unhandled messages.
 func (tv *TerminalView) Default(msg *weechat.WeechatMessage) {
+	tv.Debug(fmt.Sprintf("Uhandled message of type: %v\n", msg.Msgid))
+}
+
+// DebugPrint will create a new "debug" buffer and write messages to it.
+func (tv *TerminalView) Debug(message string) {
 	var debug *tview.TextView
 	var ok bool
 	debug, ok = tv.buffers["debug"]
 	if !ok {
 		debug = tv.creatDebugBuffer()
 	}
-	debug.Write(
-		[]byte(fmt.Sprintf("Uhandled message of type: %v\n", msg.Msgid)))
+	debug.Write([]byte(message))
 }
 
+// Helper function to create a new debug buffer to store messages.
 func (tv *TerminalView) creatDebugBuffer() *tview.TextView {
 	// create a new debugging buffer that is local only and only prints.
 	tv.bufferList.List.AddItem("[red]debug[white]", "", 0, nil)

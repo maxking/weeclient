@@ -33,12 +33,12 @@ const (
 
 // This is the primary Pubic method to decode a single Weechat Message. It
 // support zlib decompression of the compressed message.
-func (p *Protocol) Decode(data []byte) (*WeechatMessage, error) {
+func (p *Protocol) Decode(data []byte) (msg *WeechatMessage, err error) {
 	var objType, msgid string
 	// Handle error in parsing the msgBody.
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Printf("Failed to parse the object of type %v\n", objType)
+			err = fmt.Errorf("Failed to parse the object of type %v\n", objType)
 		}
 	}()
 	msglen, compressed, msgBody, _ := p.parseInitial(data)
@@ -60,14 +60,17 @@ func (p *Protocol) Decode(data []byte) (*WeechatMessage, error) {
 	obj, _ := p.parseObject(objType, msgBody)
 	// fmt.Printf("Total size: %v\nCompression: %v\nId: %v\nType: %v\n======\n",
 	// 	msglen, compressed, msgid, objType)
-	return &WeechatMessage{
+
+	// set the message and return
+	msg = &WeechatMessage{
 		Size:             int(msglen),
 		Compressed:       compressed,
 		SizeUncompressed: len(msgBody),
 		Msgid:            msgid,
 		Type:             objType,
 		Object:           obj,
-	}, nil
+	}
+	return
 }
 
 // Parse the objects as defined in the list here:

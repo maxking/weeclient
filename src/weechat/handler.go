@@ -15,6 +15,8 @@ type HandleWeechatMessage interface {
 	HandleLineAdded(*WeechatLine)
 
 	Default(*WeechatMessage)
+
+	Debug(string)
 }
 
 // Parse the message into More useful data structures that can be used by higher

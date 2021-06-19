@@ -133,3 +133,7 @@ func (mh *TerminalPrintHandler) HandleLineAdded(line *weechat.WeechatLine) {
 func (mh *TerminalPrintHandler) Default(msg *weechat.WeechatMessage) {
 	fmt.Printf(color.Gray+"Msgid: %v size: %v\n"+color.Reset, msg.Msgid, msg.Size)
 }
+
+func (mh *TerminalPrintHandler) Debug(msg string) {
+	fmt.Println(msg)
+}
