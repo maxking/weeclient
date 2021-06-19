@@ -144,7 +144,13 @@ func (tv *TerminalView) creatDebugBuffer() *tview.TextView {
 	debugView := tview.NewTextView().
 		SetTextAlign(tview.AlignLeft).
 		SetWordWrap(true).
-		SetDynamicColors(true)
+		SetDynamicColors(true).
+		SetChangedFunc(func() {
+			indices := tv.bufferList.List.FindItems("debug", "", true, false)
+			if len(indices) != 0 {
+			    tv.bufferList.List.SetItemText(indices[0], "[pink]debug **[white]", "")
+			}
+		})
 	tv.pages.AddPage("page-debug", debugView, true, false)
 	tv.buffers["debug"] = debugView
 	return debugView

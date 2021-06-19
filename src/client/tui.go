@@ -21,9 +21,11 @@ type TerminalView struct {
 
 // Event handlers.
 func (tv *TerminalView) SetCurrentBuffer(index int, mainText, secondaryText string, shortcut rune) {
-	// special handlinge for the debug buffer.
-	if mainText == "[red]debug[white]" {
+	// special handlinge for the debug buffer with and without unread count.
+	if mainText == "[red]debug[white]" || mainText == "[pink]debug **[white]" {
 		tv.pages.SwitchToPage("page-debug")
+		// remove the unread aspect.
+		tv.bufferList.List.SetItemText(index, "[red]debug[white]", "")
 		return
 	}
 	// Handle weechat buffers.
