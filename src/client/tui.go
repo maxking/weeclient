@@ -19,7 +19,7 @@ type TerminalView struct {
 	buffers    map[string]*tview.TextView
 }
 
-// Event handlers.
+// Event handler when something in a buffer widget changes.
 func (tv *TerminalView) SetCurrentBuffer(index int, mainText, secondaryText string, shortcut rune) {
 	// special handlinge for the debug buffer with and without unread count.
 	if mainText == "[red]debug[white]" || mainText == "[pink]debug **[white]" {
@@ -33,10 +33,21 @@ func (tv *TerminalView) SetCurrentBuffer(index int, mainText, secondaryText stri
 	if buf != nil {
 		// For the buffer widget, set the right number of lines.
 		if bufView, ok := tv.buffers[buf.FullName]; ok {
+			//			tv.app.QueueUpdate(func() {
 			bufView.SetText(buf.TitleStr(true) + buf.GetLines(true))
+			tv.bufferList.List.SetItemText(index, fmt.Sprintf("%v", buf.FullName), "")
+			// Then, switch to the page that is embedding the above buffer widget.
+			tv.pages.SwitchToPage(fmt.Sprintf("page-%v", buf.FullName))
+			// })
+		} else {
+			tv.Debug(
+				fmt.Sprintf(
+					"Failed to find the buffer in tv.buffers %v buffername %v\n",
+					mainText, buf.FullName))
 		}
-		// Then, switch to the page that is embedding the above buffer widget.
-		tv.pages.SwitchToPage(fmt.Sprintf("page-%v", mainText))
+
+	} else {
+		tv.Debug(fmt.Sprintf("Failed to find the buffer %v\n", mainText))
 	}
 }
 

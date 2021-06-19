@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gdamore/tcell/v2"
+	"github.com/maxking/weeclient/src/color"
 	"github.com/maxking/weeclient/src/weechat"
 	"github.com/rivo/tview"
 )
@@ -25,7 +26,7 @@ func (tv *TerminalView) HandleListBuffers(buflist map[string]*weechat.WeechatBuf
 // startup when the application boots up.
 func (tv *TerminalView) HandleBufferOpened(ptr string, buf *weechat.WeechatBuffer) {
 	// Add a new item to the List widget.
-	tv.bufferList.List.AddItem(fmt.Sprintf("%v", buf.FullName), buf.FullName, 0, nil)
+	tv.bufferList.List.AddItem(fmt.Sprintf("%v", buf.FullName), "", 0, nil)
 
 	// Create views for the main chat buffer.
 	bufferView := tview.NewTextView().
@@ -76,7 +77,24 @@ func (tv *TerminalView) HandleBufferOpened(ptr string, buf *weechat.WeechatBuffe
 
 	// TextView() doesn't auto-refresh when text is added to it. Make sure to
 	// refresh it manually.
-	bufferView.SetChangedFunc(func() { tv.app.Draw() })
+	bufferView.SetChangedFunc(func() {
+		indices := tv.bufferList.List.FindItems(buf.FullName, "", true, false)
+		if len(indices) != 0 {
+			current := tv.bufferList.List.GetCurrentItem()
+			if current == indices[0] {
+				return
+			}
+			tv.app.QueueUpdateDraw(func() {
+				// Mark the buffer color.
+				tv.bufferList.List.SetItemText(
+					indices[0],
+					fmt.Sprintf("[%v]%v[%v]",
+						color.UnreadColor, buf.FullName, color.DefaultColor), "")
+			})
+		} else {
+			tv.Debug(fmt.Sprintf("Failed to find the buffer for the name %v\n", buf.FullName))
+		}
+	})
 
 	// Add keybindings to switch between input and chat for focus.
 	layout.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
@@ -144,11 +162,10 @@ func (tv *TerminalView) creatDebugBuffer() *tview.TextView {
 	debugView := tview.NewTextView().
 		SetTextAlign(tview.AlignLeft).
 		SetWordWrap(true).
-		SetDynamicColors(true).
 		SetChangedFunc(func() {
 			indices := tv.bufferList.List.FindItems("debug", "", true, false)
 			if len(indices) != 0 {
-			    tv.bufferList.List.SetItemText(indices[0], "[pink]debug **[white]", "")
+				tv.bufferList.List.SetItemText(indices[0], "[pink]debug **[white]", "")
 			}
 		})
 	tv.pages.AddPage("page-debug", debugView, true, false)

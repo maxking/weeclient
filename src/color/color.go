@@ -14,6 +14,7 @@ const (
 	ChatColor    = "grey"
 	ChanColor    = "blue"
 	NickColor    = "pink"
+	UnreadColor  = "purple"
 )
 
 var Reset = "\033[0m"
