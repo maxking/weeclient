@@ -54,7 +54,6 @@ func HandleMessage(msg *WeechatMessage, handler HandleWeechatMessage) error {
 		for _, each := range msg.Object.Value.(WeechatHdaValue).Value {
 			addLine(handler, each)
 		}
-		// add the lines to a buffer.
 	case "listlines":
 		lines := msg.Object.Value.(WeechatHdaValue).Value
 		for i := len(lines) - 1; i >= 0; i-- {

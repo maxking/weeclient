@@ -142,7 +142,3 @@ func (l *WeechatLine) ToString(shouldColor bool) string {
 		color.ReplaceWeechatColors(l.Message, func(s string) string { return "" }))
 
 }
-
-// func (wb WeechatBuffer) AddLine(message string) {
-// 	wb.Lines = append(wb.Lines, message)
-// }

@@ -21,6 +21,12 @@ type TerminalView struct {
 
 // Event handlers.
 func (tv *TerminalView) SetCurrentBuffer(index int, mainText, secondaryText string, shortcut rune) {
+	// special handlinge for the debug buffer.
+	if mainText == "[red]debug[white]" {
+		tv.pages.SwitchToPage("page-debug")
+		return
+	}
+	// Handle weechat buffers.
 	buf := tv.bufferList.getByFullName(mainText)
 	if buf != nil {
 		// For the buffer widget, set the right number of lines.

@@ -103,7 +103,7 @@ func (tv *TerminalView) HandleBufferOpened(ptr string, buf *weechat.WeechatBuffe
 }
 
 func (tv *TerminalView) HandleNickList(msg *weechat.WeechatMessage) {
-
+	// handle nicklist.
 }
 
 // Handle a _buffer_line_added event from Weechat server.
@@ -118,5 +118,24 @@ func (tv *TerminalView) HandleLineAdded(line *weechat.WeechatLine) {
 
 // Default handler which handles all the unhandled messages.
 func (tv *TerminalView) Default(msg *weechat.WeechatMessage) {
+	var debug *tview.TextView
+	var ok bool
+	debug, ok = tv.buffers["debug"]
+	if !ok {
+		debug = tv.creatDebugBuffer()
+	}
+	debug.Write(
+		[]byte(fmt.Sprintf("Uhandled message of type: %v\n", msg.Msgid)))
+}
 
+func (tv *TerminalView) creatDebugBuffer() *tview.TextView {
+	// create a new debugging buffer that is local only and only prints.
+	tv.bufferList.List.AddItem("[red]debug[white]", "", 0, nil)
+	debugView := tview.NewTextView().
+		SetTextAlign(tview.AlignLeft).
+		SetWordWrap(true).
+		SetDynamicColors(true)
+	tv.pages.AddPage("page-debug", debugView, true, false)
+	tv.buffers["debug"] = debugView
+	return debugView
 }
