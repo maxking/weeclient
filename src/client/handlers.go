@@ -79,21 +79,41 @@ func (tv *TerminalView) HandleBufferOpened(ptr string, buf *weechat.WeechatBuffe
 	// refresh it manually.
 	bufferView.SetChangedFunc(func() {
 		indices := tv.bufferList.List.FindItems(buf.FullName, "", true, false)
-		if len(indices) != 0 {
-			current := tv.bufferList.List.GetCurrentItem()
-			if current == indices[0] {
-				return
-			}
-			tv.app.QueueUpdateDraw(func() {
-				// Mark the buffer color.
-				tv.bufferList.List.SetItemText(
-					indices[0],
-					fmt.Sprintf("[%v]%v[%v]",
-						color.UnreadColor, buf.FullName, color.DefaultColor), "")
-			})
-		} else {
-			tv.Debug(fmt.Sprintf("Failed to find the buffer for the name %v\n", buf.FullName))
+		if len(indices) == 0 {
+			tv.Debug(fmt.Sprintf("Failed to find the buffer for the name %v count: %v\n", buf.FullName, len(indices)))
+			return
 		}
+		// If more than one matched, find the exact match, otherwise, foud
+		// represent the index of the buffer.
+		var found int
+		if len(indices) > 1 {
+			found = indices[0]
+			for _, index := range indices {
+				main, _ := tv.bufferList.List.GetItemText(index)
+				if color.RemoveColor(main) == buf.FullName {
+					found = index
+					break
+				}
+			}
+		} else {
+			found = indices[0]
+		}
+		// Don't do anything if this is the current buffer. Usually,
+		// ChangedFunc is called when some text is added and also
+		// when the current view is selected as the current item. Hence
+		// we need to check for ourselves.
+		current := tv.bufferList.List.GetCurrentItem()
+		if current == found {
+			return
+		}
+		tv.app.QueueUpdateDraw(func() {
+			// Mark the buffer color.
+			tv.bufferList.List.SetItemText(
+				found,
+				fmt.Sprintf("[%v]%v[%v]",
+					color.UnreadColor, buf.FullName, color.DefaultColor), "")
+		})
+
 	})
 
 	// Add keybindings to switch between input and chat for focus.
