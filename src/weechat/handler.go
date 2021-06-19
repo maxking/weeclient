@@ -50,23 +50,16 @@ func HandleMessage(msg *WeechatMessage, handler HandleWeechatMessage) error {
 
 		handler.HandleListBuffers(buflist)
 
-	case "_buffer_line_added", "listlines":
+	case "_buffer_line_added":
 		for _, each := range msg.Object.Value.(WeechatHdaValue).Value {
-			secs, _ := strconv.ParseInt(each["date"].as_string(), 10, 64)
-			utime := time.Unix(secs, 0)
-			line := WeechatLine{
-				Buffer:  each["buffer"].as_string(),
-				Message: each["message"].as_string(),
-				Date:    utime,
-				// DatePrinted: each["date_printed"].as_string(),
-				Displayed: each["displayed"].as_bool(),
-				// NotifyLevel: each["notify_level"].as_int(),
-				Highlight: each["highlight"].as_bool(),
-				Prefix:    each["prefix"].as_string(),
-			}
-			handler.HandleLineAdded(&line)
+			addLine(handler, each)
 		}
 		// add the lines to a buffer.
+	case "listlines":
+		lines := msg.Object.Value.(WeechatHdaValue).Value
+		for i := len(lines) - 1; i >= 0; i-- {
+			addLine(handler, lines[i])
+		}
 	case "nicklist":
 		// handle list of nicks.
 		handler.HandleNickList(msg)
@@ -74,5 +67,22 @@ func HandleMessage(msg *WeechatMessage, handler HandleWeechatMessage) error {
 	default:
 		handler.Default(msg)
 	}
+	return nil
+}
+
+func addLine(handler HandleWeechatMessage, each map[string]WeechatObject) error {
+	secs, _ := strconv.ParseInt(each["date"].as_string(), 10, 64)
+	utime := time.Unix(secs, 0)
+	line := WeechatLine{
+		Buffer:  each["buffer"].as_string(),
+		Message: each["message"].as_string(),
+		Date:    utime,
+		// DatePrinted: each["date_printed"].as_string(),
+		Displayed: each["displayed"].as_bool(),
+		// NotifyLevel: each["notify_level"].as_int(),
+		Highlight: each["highlight"].as_bool(),
+		Prefix:    each["prefix"].as_string(),
+	}
+	handler.HandleLineAdded(&line)
 	return nil
 }

@@ -35,6 +35,12 @@ const (
 // support zlib decompression of the compressed message.
 func (p *Protocol) Decode(data []byte) (*WeechatMessage, error) {
 	var objType, msgid string
+	// Handle error in parsing the msgBody.
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("Failed to parse the object of type %v\n", objType)
+		}
+	}()
 	msglen, compressed, msgBody, _ := p.parseInitial(data)
 	if compressed {
 		var out bytes.Buffer
@@ -50,12 +56,6 @@ func (p *Protocol) Decode(data []byte) (*WeechatMessage, error) {
 	}
 	msgid, msgBody = p.ParseString(msgBody)
 	objType, msgBody = p.parseType(msgBody)
-	// Handle error in parsing the msgBody.
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Printf("Failed to parse the object of type %v\n", objType)
-		}
-	}()
 
 	obj, _ := p.parseObject(objType, msgBody)
 	// fmt.Printf("Total size: %v\nCompression: %v\nId: %v\nType: %v\n======\n",
@@ -93,7 +93,7 @@ func (p *Protocol) parseObject(
 	case OBJ_HTB:
 		return p.parseHashTable(data)
 	case OBJ_HDA:
-		return p.parseHda(data)		
+		return p.parseHda(data)
 	case OBJ_ARR:
 		return p.parseArray(data)
 	case OBJ_INF:
