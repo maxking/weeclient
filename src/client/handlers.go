@@ -104,6 +104,7 @@ func (tv *TerminalView) HandleBufferOpened(ptr string, buf *weechat.WeechatBuffe
 		// we need to check for ourselves.
 		current := tv.bufferList.List.GetCurrentItem()
 		if current == found {
+			tv.app.Draw()
 			return
 		}
 		tv.app.QueueUpdateDraw(func() {
