@@ -145,7 +145,7 @@ func (l *WeechatLine) ToString(shouldColor bool) string {
 		return fmt.Sprintf("[%v][%v] [%v] %v: [%v] %v[%v]",
 			color.TimeColor, l.Date.Format("15:05"),
 			color.NickColor, l.Prefix,
-			color.MsgColor, color.ReplaceWeechatColors(msg, color.Colorize),
+			l.getMessageColor(msg), color.ReplaceWeechatColors(msg, color.Colorize),
 			color.DefaultColor)
 	}
 	return fmt.Sprintf("[%v:%v] %v: %v",
@@ -154,4 +154,25 @@ func (l *WeechatLine) ToString(shouldColor bool) string {
 		// Replace colors with just nothing.
 		color.ReplaceWeechatColors(l.Message, func(s string) string { return "" }))
 
+}
+
+// Given a message, return what color should be used.
+func (l *WeechatLine) getMessageColor(msg string) string {
+	mapping := []struct {
+		substring string
+		color     string
+	}{
+		{"has joined", color.JoinColor},
+		{"has quit", color.LeaveColor},
+		{"has left", color.LeaveColor},
+		{"is now known as", color.NickChangeColor},
+	}
+
+	for _, pattern := range mapping {
+		if strings.Contains(msg, pattern.substring) {
+			return pattern.color
+		}
+	}
+	// default color.
+	return color.MsgColor
 }

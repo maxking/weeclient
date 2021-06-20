@@ -15,6 +15,11 @@ const (
 	ChanColor    = "blue"
 	NickColor    = "pink"
 	UnreadColor  = "purple"
+	// Color for messages that have particular sub-strings,
+	// like join and leave
+	JoinColor       = "grey"
+	LeaveColor      = "grey"
+	NickChangeColor = "grey"
 )
 
 var Reset = "\033[0m"
