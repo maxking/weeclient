@@ -165,6 +165,7 @@ func (l *WeechatLine) getMessageColor(msg string) string {
 		{"has joined", color.JoinColor},
 		{"has quit", color.LeaveColor},
 		{"has left", color.LeaveColor},
+		{"is back on", color.LeaveColor},
 		{"is now known as", color.NickChangeColor},
 	}
 
