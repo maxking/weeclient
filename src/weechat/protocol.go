@@ -190,7 +190,7 @@ func (p *Protocol) parseTime(data []byte) (WeechatObject, []byte) {
 // Parse a single character of length 1 byte.
 // https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_char
 func (p *Protocol) parseChar(data []byte) (WeechatObject, []byte) {
-	return WeechatObject{OBJ_CHR, data[0]}, data[1:]
+	return WeechatObject{OBJ_CHR, string(data[0])}, data[1:]
 }
 
 // Parse a hash table datatype. It starts with two Type (3byte) (key type, value type)

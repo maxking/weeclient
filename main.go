@@ -84,10 +84,9 @@ func main() {
 
 			weeMsg, err := weeproto.Decode(append(msgLen, msg...))
 			if err != nil {
-				// fmt.Printf("Failed to decode message from weechat. %v", err)
 				weechan <- &weechat.WeechatMessage{
 					Msgid:  "error",
-					Object: weechat.WeechatObject{"error", err},
+					Object: weechat.WeechatObject{ObjType: "error", Value: err},
 				}
 			} else {
 				weechan <- weeMsg

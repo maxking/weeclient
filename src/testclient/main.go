@@ -125,7 +125,7 @@ func (mh *TerminalPrintHandler) HandleListLines() {
 	// noop.
 }
 
-func (mh *TerminalPrintHandler) HandleNickList(buffer string, nicks []string) {
+func (mh *TerminalPrintHandler) HandleNickList(buffer string, nicks []*weechat.WeechatNick) {
 	fmt.Printf("Nicklist %v: %v\n", buffer, nicks)
 }
 

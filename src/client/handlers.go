@@ -146,7 +146,7 @@ func (tv *TerminalView) HandleBufferOpened(ptr string, buf *weechat.WeechatBuffe
 	tv.buffers[buf.FullName] = bufferView
 }
 
-func (tv *TerminalView) HandleNickList(buffer string, nicks []string) {
+func (tv *TerminalView) HandleNickList(buffer string, nicks []*weechat.WeechatNick) {
 	// handle nicklist.
 	buf := tv.bufferList.Buffers[buffer]
 	if buf != nil {
@@ -154,8 +154,10 @@ func (tv *TerminalView) HandleNickList(buffer string, nicks []string) {
 			buf.NickList.Clear()
 		}
 		for _, nick := range nicks {
-			buf.NickList.AddItem(nick, "", 0, nil)
-			tv.app.Draw()
+			if !nick.Group && nick.Level == 0 {
+				buf.NickList.AddItem(nick.String(), "", 0, nil)
+				tv.app.Draw()
+			}
 		}
 	} else {
 		tv.Debug(fmt.Sprintf("Failed to add nicks %v to buffer %v as buffer == nil\n", nicks, buffer))

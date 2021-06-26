@@ -31,12 +31,12 @@ func (o WeechatObject) as_string() string {
 	// }
 }
 
-func (o WeechatObject) as_int() uint32 {
-	return o.Value.(uint32)
+func (o WeechatObject) as_int() int32 {
+	return o.Value.(int32)
 }
 
 func (o WeechatObject) as_bool() bool {
-	return o.Value == '0'
+	return o.Value == "1"
 }
 
 // Object representing information needed to be sent.
@@ -180,4 +180,26 @@ func (l *WeechatLine) getMessageColor(msg string) string {
 	}
 	// default color.
 	return color.MsgColor
+}
+
+type WeechatNick struct {
+	Group       bool
+	Visible     bool
+	Level       int32
+	Name        string
+	Color       string
+	Prefix      string
+	PrefixColor string
+}
+
+func (n *WeechatNick) String() string {
+	if n.Prefix != "" && n.Prefix != " " {
+		return fmt.Sprintf("%v%v", n.Prefix, n.Name)
+	}
+	return n.Name
+}
+
+type WeechatNickDiff struct {
+	WeechatNick
+	Diff string
 }
