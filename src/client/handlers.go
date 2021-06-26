@@ -47,10 +47,10 @@ func (tv *TerminalView) HandleBufferOpened(ptr string, buf *weechat.WeechatBuffe
 	input.SetDoneFunc(func(key tcell.Key) {
 		switch key {
 		case tcell.KeyEnter:
-			sendobj := weechat.WeechatSendMessage{
+			sendobj := &weechat.WeechatSendMessage{
 				Message: input.GetText(),
 				Buffer:  buf.FullName}
-			tv.sendchan <- &sendobj
+			tv.sendchan <- sendobj.String()
 			input.SetText("")
 		case tcell.KeyEscape:
 			input.SetText("")
@@ -58,18 +58,23 @@ func (tv *TerminalView) HandleBufferOpened(ptr string, buf *weechat.WeechatBuffe
 
 	})
 
+	// nick list of the buffer.
+	nicklist := tview.NewList().ShowSecondaryText(false)
+
 	// Grid for the buffer view with a top row with all the chat and then
 	// a bottom input box, of length 1.
 	layout := tview.NewGrid().
 		SetRows(-1, 1).
+		SetColumns(-1, 15).
 		SetBorders(false).
 		AddItem(bufferView, 0, 0, 1, 1, 0, 0, false).
-		AddItem(input, 1, 0, 1, 1, 0, 0, true)
+		AddItem(input, 1, 0, 1, 1, 0, 0, true).
+		AddItem(nicklist, 0, 1, 1, 1, 0, 0, false)
 
 	// Buffer is a weechat buffer object, which includes the WeechatBuffer object
 	// and all the widgets associated with a single buffer window. In future, this
 	// will grow to add more widgets like nicklist for example.
-	buffer := &Buffer{WeechatBuffer: buf, Input: input, Chat: bufferView}
+	buffer := &Buffer{WeechatBuffer: buf, Input: input, Chat: bufferView, NickList: nicklist}
 	tv.bufferList.Buffers[ptr] = buffer
 
 	// The main biffer view page.
@@ -141,8 +146,20 @@ func (tv *TerminalView) HandleBufferOpened(ptr string, buf *weechat.WeechatBuffe
 	tv.buffers[buf.FullName] = bufferView
 }
 
-func (tv *TerminalView) HandleNickList(msg *weechat.WeechatMessage) {
+func (tv *TerminalView) HandleNickList(buffer string, nicks []string) {
 	// handle nicklist.
+	buf := tv.bufferList.Buffers[buffer]
+	if buf != nil {
+		if buf.NickList.GetItemCount() != 0 {
+			buf.NickList.Clear()
+		}
+		for _, nick := range nicks {
+			buf.NickList.AddItem(nick, "", 0, nil)
+			tv.app.Draw()
+		}
+	} else {
+		tv.Debug(fmt.Sprintf("Failed to add nicks %v to buffer %v as buffer == nil\n", nicks, buffer))
+	}
 }
 
 // Handle a _buffer_line_added event from Weechat server.
@@ -158,8 +175,8 @@ func (tv *TerminalView) HandleLineAdded(line *weechat.WeechatLine) {
 // Default handler which handles all the unhandled messages.
 func (tv *TerminalView) Default(msg *weechat.WeechatMessage) {
 	tv.Debug(
-		fmt.Sprintf("Uhandled message MsgId: %v ObjType: %v Size: %v\n",
-			msg.Msgid, msg.Type, msg.Size))
+		fmt.Sprintf("Uhandled message MsgId: %v ObjType: %v Size: %v Value: %v\n",
+			msg.Msgid, msg.Type, msg.Size, msg.Object.Value))
 	if msg.Type == weechat.OBJ_HDA {
 		tv.Debug(msg.Object.Value.(weechat.WeechatHdaValue).DebugPrint())
 	}

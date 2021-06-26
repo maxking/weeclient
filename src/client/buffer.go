@@ -9,9 +9,10 @@ import (
 
 type Buffer struct {
 	*weechat.WeechatBuffer
-	Chat  *tview.TextView
-	Users *tview.List
-	Input *tview.InputField
+	Chat     *tview.TextView
+	Users    *tview.List
+	Input    *tview.InputField
+	NickList *tview.List
 }
 
 type BufferListWidget struct {

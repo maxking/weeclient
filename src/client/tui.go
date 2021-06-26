@@ -4,6 +4,7 @@ package client
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/maxking/weeclient/src/weechat"
@@ -13,7 +14,7 @@ import (
 type TerminalView struct {
 	app        *tview.Application
 	grid       *tview.Grid
-	sendchan   chan *weechat.WeechatSendMessage
+	sendchan   chan string
 	bufferList *BufferListWidget
 	pages      *tview.Pages
 	buffers    map[string]*tview.TextView
@@ -38,6 +39,11 @@ func (tv *TerminalView) SetCurrentBuffer(index int, mainText, secondaryText stri
 			tv.bufferList.List.SetItemText(index, fmt.Sprintf("%v", buf.FullName), "")
 			// Then, switch to the page that is embedding the above buffer widget.
 			tv.pages.SwitchToPage(fmt.Sprintf("page-%v", buf.FullName))
+			// Send command to load nicklist of the buffer if there
+			// is no nicklist in it and it is a channel not person (# check)
+			if buf.FullName != "debug" && buf.NickList.GetItemCount() == 0 && strings.Contains(buf.FullName, "#") {
+				tv.sendchan <- fmt.Sprintf("(nicklist) nicklist %v\n", buf.FullName)
+			}
 			// })
 		} else {
 			tv.Debug(
@@ -56,7 +62,7 @@ func (tv *TerminalView) FocusBuffer(index int, mainText, SecondaryTest string, s
 }
 
 func TviewStart(
-	weechan chan *weechat.WeechatMessage, sendchan chan *weechat.WeechatSendMessage) {
+	weechan chan *weechat.WeechatMessage, sendchan chan string) {
 	app := tview.NewApplication()
 	bufffers := make(map[string]*Buffer)
 	buflist := NewBufferListWidget(bufffers)

@@ -18,10 +18,13 @@ const (
 	authCommand    = `init password=%v`
 	initialCommand = `(listbuffers) hdata buffer:gui_buffers(*) number,full_name,short_name,type,nicklist,title,local_variables,
 (listlines) hdata buffer:gui_buffers(*)/own_lines/last_line(-%(lines)d)/data date,displayed,prefix,message,buffer
-(nicklist) nicklist
 sync
 `
 )
+
+func init() {
+	weechat.DebugPrint = true
+}
 
 // var relay = "localhost:8080"
 
@@ -81,7 +84,7 @@ func main() {
 
 			weeMsg, err := weeproto.Decode(append(msgLen, msg...))
 			if err != nil {
-				fmt.Printf("Failed to decode message from weechat. %v", err)
+				fmt.Printf("Failed to decode message from weechat. %v\n", err)
 			} else {
 				weechat.HandleMessage(weeMsg, &handler)
 			}
@@ -122,8 +125,8 @@ func (mh *TerminalPrintHandler) HandleListLines() {
 	// noop.
 }
 
-func (mh *TerminalPrintHandler) HandleNickList(msg *weechat.WeechatMessage) {
-	// noop.
+func (mh *TerminalPrintHandler) HandleNickList(buffer string, nicks []string) {
+	fmt.Printf("Nicklist %v: %v\n", buffer, nicks)
 }
 
 func (mh *TerminalPrintHandler) HandleLineAdded(line *weechat.WeechatLine) {

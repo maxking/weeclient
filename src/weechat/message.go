@@ -45,6 +45,10 @@ type WeechatSendMessage struct {
 	Buffer  string
 }
 
+func (w *WeechatSendMessage) String() string {
+	return fmt.Sprintf("input %v %v\n", w.Buffer, w.Message)
+}
+
 // Represents a single message from weechat.
 type WeechatMessage struct {
 	// Size of the message when recieved including the length (4bytes).

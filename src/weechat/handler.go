@@ -10,7 +10,7 @@ import (
 type HandleWeechatMessage interface {
 	HandleListBuffers(map[string]*WeechatBuffer)
 
-	HandleNickList(*WeechatMessage)
+	HandleNickList(string, []string)
 
 	HandleLineAdded(*WeechatLine)
 
@@ -61,10 +61,18 @@ func HandleMessage(msg *WeechatMessage, handler HandleWeechatMessage) error {
 		for i := len(lines) - 1; i >= 0; i-- {
 			addLine(handler, lines[i])
 		}
-	case "nicklist":
+	case "nicklist", "_nicklist":
 		// handle list of nicks.
-		handler.HandleNickList(msg)
-
+		var nicks []string
+		nickValues := msg.Object.Value.(WeechatHdaValue).Value
+		var buffer = "default"
+		for _, val := range nickValues {
+			nicks = append(nicks, val["name"].as_string())
+			buffer = val["__path"].Value.([]string)[2]
+		}
+		handler.HandleNickList(buffer, nicks)
+	case "error":
+		handler.Default(msg)
 	default:
 		handler.Default(msg)
 	}

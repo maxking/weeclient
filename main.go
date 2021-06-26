@@ -18,7 +18,6 @@ const (
 	authCommand    = `init password=%v`
 	initialCommand = `(listbuffers) hdata buffer:gui_buffers(*) number,full_name,short_name,type,nicklist,title,local_variables,
 (listlines) hdata buffer:gui_buffers(*)/own_lines/last_line(-15)/data date,displayed,prefix,message,buffer
-(nicklist) nicklist
 sync
 `
 )
@@ -86,6 +85,10 @@ func main() {
 			weeMsg, err := weeproto.Decode(append(msgLen, msg...))
 			if err != nil {
 				// fmt.Printf("Failed to decode message from weechat. %v", err)
+				weechan <- &weechat.WeechatMessage{
+					Msgid:  "error",
+					Object: weechat.WeechatObject{"error", err},
+				}
 			} else {
 				weechan <- weeMsg
 			}
@@ -94,11 +97,11 @@ func main() {
 
 	// channel to send message. message is received from terminal ui and sent to remote
 	// server in the goroutine.
-	sendchan := make(chan *weechat.WeechatSendMessage)
+	sendchan := make(chan string)
 	// handle sending of message.
 	go func() {
 		for sendmsg := range sendchan {
-			conn.Write([]byte(fmt.Sprintf("input %v %v\n", sendmsg.Buffer, sendmsg.Message)))
+			conn.Write([]byte(sendmsg))
 		}
 	}()
 

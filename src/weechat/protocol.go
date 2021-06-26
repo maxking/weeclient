@@ -31,6 +31,9 @@ const (
 	OBJ_ARR = "arr"
 )
 
+// Debug.
+var DebugPrint = false
+
 // This is the primary Pubic method to decode a single Weechat Message. It
 // support zlib decompression of the compressed message.
 func (p *Protocol) Decode(data []byte) (msg *WeechatMessage, err error) {
@@ -38,7 +41,7 @@ func (p *Protocol) Decode(data []byte) (msg *WeechatMessage, err error) {
 	// Handle error in parsing the msgBody.
 	defer func() {
 		if r := recover(); r != nil {
-			err = fmt.Errorf("Failed to parse the object of type %v\n", objType)
+			err = fmt.Errorf("failed to parse the object of type %v: %v", objType, r)
 		}
 	}()
 	msglen, compressed, msgBody, _ := p.parseInitial(data)
@@ -126,7 +129,9 @@ func (p *Protocol) ParseString(data []byte) (string, []byte) {
 		// panic(fmt.Sprintf("Found length larger than int_max %v", length))
 		return "", data
 	} else if length <= 0 {
-		// panic(fmt.Sprintf("Found negative length %v", length))
+		if DebugPrint {
+			fmt.Printf("Found negative length %v\n", length)
+		}
 		return "", data
 	}
 	if int(length) > len(data) {
@@ -185,7 +190,7 @@ func (p *Protocol) parseTime(data []byte) (WeechatObject, []byte) {
 // Parse a single character of length 1 byte.
 // https://weechat.org/files/doc/stable/weechat_relay_protocol.en.html#object_char
 func (p *Protocol) parseChar(data []byte) (WeechatObject, []byte) {
-	return WeechatObject{OBJ_CHR, string(data[0])}, data[1:]
+	return WeechatObject{OBJ_CHR, data[0]}, data[1:]
 }
 
 // Parse a hash table datatype. It starts with two Type (3byte) (key type, value type)
@@ -299,8 +304,9 @@ func (p *Protocol) parseHda(data []byte) (WeechatObject, []byte) {
 	// parse the count.
 	count, remaining = p.ParseLen(remaining)
 
-	// fmt.Printf("hpath: %v\nkeys: %v\ncount: %v\n", hpath, keys, count)
-
+	if DebugPrint {
+		fmt.Printf("hpath: %v\nkeys: %v\ncount: %v\n", hpath, keys, count)
+	}
 	pointerCount := len(strings.Split(hpath, "/"))
 
 	// Parse objects based on keys "count" number of times.
@@ -315,7 +321,6 @@ func (p *Protocol) parseHda(data []byte) (WeechatObject, []byte) {
 	var pointers []string
 
 	for j := 0; j < int(count); j++ {
-
 		// Parse out the pointers, there is no use of them that I
 		// can think of. Perhaps, in future, we can use it somewhere.
 		pointers, remaining = p.parsePointers(pointerCount, remaining)
@@ -324,13 +329,18 @@ func (p *Protocol) parseHda(data []byte) (WeechatObject, []byte) {
 		// sorta bad pattern here to jam in the pointers into the hda
 		// map so that it can be used later.
 		hdamap["__path"] = WeechatObject{"__path", pointers}
-		for _, obj := range objects {
+		for i, obj := range objects {
 			s := strings.Split(obj, ":")
 			objName, objtype := s[0], s[1]
 			objVal, remaining = p.parseObject(objtype, remaining)
-			// fmt.Printf("%v:%v. Parsed %v of type %v value\n",
-			// 	j, i, objname, objtype)
+			if DebugPrint {
+				fmt.Printf("%v/%v :%v. Parsed %v of type %v value %v\n",
+					j, count, i, objName, objtype, objVal)
+			}
 			hdamap[objName] = objVal
+		}
+		if DebugPrint {
+			fmt.Println("---")
 		}
 		// Now add it to the hda list.
 		hda = append(hda, hdamap)
