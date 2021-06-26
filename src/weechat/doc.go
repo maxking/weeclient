@@ -11,8 +11,22 @@ parse all the Core weechat object types.
 There are a few more public methods, ParseString and ParseInt
 which provide public methods to parse the string and uint32 types.
 
-Protocol Parsing
+Connection
 
+Weechat package supports two different ways to connect to the
+remote relay, direct over tcp and over http websocket connection.
+Both connection types are wrapped by WeechatConnFactory() that
+takes the type of connection and connection parameters as input
+and return one of two supported types.
+
+Connection implementation for both types will read a single
+weechat message from remote relay and return the bytes for that
+message.
+
+Websocket connection currently is the only which support SSL,
+although, it can be supported in the direct connection in future.
+
+Protocol Parsing
 
 Decode method returns a WeechatMessage object which includes
 various methods including a list of WeechatObjects and Msgid.
