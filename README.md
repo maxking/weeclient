@@ -35,17 +35,17 @@ KeyBindings
 
 **Buffer list**
 
-- `Ctrl + b`: Move focus to buffer list.
-- `Enter` : When in buffer list, this will move focus to the input box of the buffer.
+- <kbd>Ctrl</kbd> + <kbd>b</kbd>: Move focus to buffer list.
+- <kbd>Enter</kbd> : When in buffer list, this will move focus to the input box of the buffer.
 
 **Buffer view**
 
-- `Ctrl + s`: Move focus to the chat and allow scrolling up and down
-- `Ctrl + i`: Move focus to the input box.
+- <kbd>Ctrl</kbd> + <kbd>s</kbd>: Move focus to the chat and allow scrolling up and down
+- <kbd>Ctrl</kbd> + <kbd>i</kbd>: Move focus to the input box.
 
 **Input box**
-- `Esc`: Clear the box.
-- `Enter`: Send the message in the box.
+- <kbd>Esc</kbd>: Clear the box.
+- <kbd>Enter</kbd>: Send the message in the box.
 
 
 Testing Relay
