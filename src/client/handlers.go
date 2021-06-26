@@ -2,8 +2,10 @@ package client
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/gdamore/tcell/v2"
+	"github.com/gen2brain/beeep"
 	"github.com/maxking/weeclient/src/color"
 	"github.com/maxking/weeclient/src/weechat"
 	"github.com/rivo/tview"
@@ -171,6 +173,10 @@ func (tv *TerminalView) HandleLineAdded(line *weechat.WeechatLine) {
 	// Also, add the message to the current view.
 	if bufView, ok := tv.buffers[buf.FullName]; ok {
 		bufView.Write([]byte("\n" + line.ToString(true)))
+	}
+
+	if strings.Contains(line.ToString(false), "maxking") {
+		beeep.Notify(fmt.Sprintf("weeclient: %v", buf.FullName), line.ToString(false), "")
 	}
 }
 

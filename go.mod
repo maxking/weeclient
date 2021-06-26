@@ -4,6 +4,8 @@ go 1.16
 
 require (
 	github.com/gdamore/tcell/v2 v2.3.3
+	github.com/gen2brain/beeep v0.0.0-20210529141713-5586760f0cc1 // indirect
+	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/rivo/tview v0.0.0-20210608105643-d4fb0348227b
 	github.com/yuin/goldmark v1.3.7 // indirect
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9 // indirect

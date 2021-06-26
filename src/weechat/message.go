@@ -147,7 +147,7 @@ func (l *WeechatLine) ToString(shouldColor bool) string {
 		re := regexp.MustCompile(`\]`)
 		msg := string(re.ReplaceAll([]byte(l.Message), []byte("[]")))
 		return fmt.Sprintf("[%v][%v] [%v] %v: [%v] %v[%v]",
-			color.TimeColor, l.Date.Format("15:00"),
+			color.TimeColor, l.Date.Format("15:04"),
 			color.NickColor, color.ReplaceWeechatColors(l.Prefix, color.Colorize),
 			l.getMessageColor(msg), color.ReplaceWeechatColors(msg, color.Colorize),
 			color.DefaultColor)
