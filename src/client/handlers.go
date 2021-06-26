@@ -26,7 +26,7 @@ func (tv *TerminalView) HandleListBuffers(buflist map[string]*weechat.WeechatBuf
 // startup when the application boots up.
 func (tv *TerminalView) HandleBufferOpened(ptr string, buf *weechat.WeechatBuffer) {
 	// Add a new item to the List widget.
-	tv.bufferList.List.AddItem(fmt.Sprintf("%v", buf.FullName), "", 0, nil)
+	tv.bufferList.AddBuffer(buf.FullName)
 
 	// Create views for the main chat buffer.
 	bufferView := tview.NewTextView().

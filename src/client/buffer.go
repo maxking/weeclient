@@ -1,6 +1,8 @@
 package client
 
 import (
+	"strings"
+
 	"github.com/maxking/weeclient/src/color"
 	"github.com/maxking/weeclient/src/weechat"
 
@@ -31,6 +33,7 @@ func (bw *BufferListWidget) getByFullName(fullname string) *Buffer {
 	return nil
 }
 
+// Create a new buffer list widget.
 func NewBufferListWidget(buflist map[string]*Buffer) *BufferListWidget {
 	widget := &BufferListWidget{
 		List:    tview.NewList().ShowSecondaryText(false),
@@ -39,6 +42,22 @@ func NewBufferListWidget(buflist map[string]*Buffer) *BufferListWidget {
 	return widget
 }
 
-func (w *BufferListWidget) AddBuffer(buffer *weechat.WeechatBuffer) {
-
+// Add a new buffer to the buffer list widget.
+// Sorting order is:
+// core.weechat
+// irc.server....
+// irc.<server>.#channel
+// irc.<server>.nick
+func (w *BufferListWidget) AddBuffer(buffer string) {
+	var index int
+	if buffer == "core.weechat" {
+		index = 0
+	} else if strings.Contains(buffer, "irc.server") {
+		index = 1
+	} else if strings.Contains(buffer, "#") {
+		index = 2
+	} else {
+		index = -1
+	}
+	w.List.InsertItem(index, buffer, "", 0, nil)
 }

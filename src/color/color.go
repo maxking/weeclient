@@ -7,9 +7,9 @@ import (
 )
 
 const (
-	TitleColor   = "red"
-	DefaultColor = "white"
-	TimeColor    = "green"
+	TitleColor   = "green"
+	DefaultColor = "-:-:-"
+	TimeColor    = "grey"
 	MsgColor     = "white"
 	ChatColor    = "grey"
 	ChanColor    = "blue"
@@ -20,6 +20,9 @@ const (
 	JoinColor       = "grey"
 	LeaveColor      = "grey"
 	NickChangeColor = "grey"
+
+	// color with bold
+	BoldBlue = "blue::b"
 )
 
 var Reset = "\033[0m"
