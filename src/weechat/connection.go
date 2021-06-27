@@ -59,23 +59,23 @@ func WeechatConnFactory(connType ConnectionType, url string, path string, ssl bo
 
 // WeechatWebsocetConn object connects to Weechat over a HTTP Websocket
 // so that it can talk to relays behind reverse proxies.
-type WeechatWebsocketConn struct {
+type websocketConn struct {
 	URL  *url.URL
 	conn websocket.Conn
 }
 
 // Create a new WeechatWebsocketConn object.
-func NewWebsocketConn(host string, path string, ssl bool) *WeechatWebsocketConn {
+func NewWebsocketConn(host string, path string, ssl bool) *websocketConn {
 	url := &url.URL{Host: host, Path: path}
 	if ssl {
 		url.Scheme = "wss"
 	} else {
 		url.Scheme = "ws"
 	}
-	return &WeechatWebsocketConn{URL: url}
+	return &websocketConn{URL: url}
 }
 
-func (w *WeechatWebsocketConn) Connect() error {
+func (w *websocketConn) Connect() error {
 	conn, _, err := websocket.DefaultDialer.Dial(w.URL.String(), nil)
 	if err != nil {
 		return fmt.Errorf("failed to connect to remote relay at %v: %v",
@@ -85,7 +85,7 @@ func (w *WeechatWebsocketConn) Connect() error {
 	return nil
 }
 
-func (w *WeechatWebsocketConn) Write(data []byte) error {
+func (w *websocketConn) Write(data []byte) error {
 	err := w.conn.WriteMessage(websocket.BinaryMessage, data)
 	if err != nil {
 		return fmt.Errorf("failed to send message: %v", err)
@@ -93,24 +93,24 @@ func (w *WeechatWebsocketConn) Write(data []byte) error {
 	return nil
 }
 
-func (w *WeechatWebsocketConn) Read() ([]byte, error) {
+func (w *websocketConn) Read() ([]byte, error) {
 	_, msg, err := w.conn.ReadMessage()
 	return msg, err
 }
 
 // This connects directly to the weechat relay over tcp without any
 // http layer in between.
-type WeechatRelayConn struct {
+type relayConn struct {
 	URL  string
 	conn net.Conn
 }
 
 // Create a new WeechatRelayConn instance.
-func NewRelayConn(url string) *WeechatRelayConn {
-	return &WeechatRelayConn{URL: url}
+func NewRelayConn(url string) *relayConn {
+	return &relayConn{URL: url}
 }
 
-func (w *WeechatRelayConn) Connect() error {
+func (w *relayConn) Connect() error {
 	conn, err := net.Dial("tcp", w.URL)
 	if err != nil {
 		return fmt.Errorf("failed to connect to relay: %v", err)
@@ -119,7 +119,7 @@ func (w *WeechatRelayConn) Connect() error {
 	return nil
 }
 
-func (w *WeechatRelayConn) Write(data []byte) error {
+func (w *relayConn) Write(data []byte) error {
 	_, err := w.conn.Write(data)
 	return err
 }
@@ -130,7 +130,7 @@ func (w *WeechatRelayConn) Write(data []byte) error {
 // length, convert it to int32 and then use it to read the whole
 // message. Then we combine the length and message object and
 // return the bytes.
-func (w *WeechatRelayConn) Read() ([]byte, error) {
+func (w *relayConn) Read() ([]byte, error) {
 	msgLen := make([]byte, 4)
 	_, err := w.conn.Read(msgLen)
 	if err != nil {
