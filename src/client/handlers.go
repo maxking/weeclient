@@ -211,7 +211,9 @@ func (tv *TerminalView) creatDebugBuffer() *tview.TextView {
 		SetChangedFunc(func() {
 			indices := tv.bufferList.List.FindItems("debug", "", true, false)
 			if len(indices) != 0 {
-				tv.bufferList.List.SetItemText(indices[0], "[pink]debug **[white]", "")
+				tv.app.QueueUpdateDraw(func() {
+					tv.bufferList.List.SetItemText(indices[0], "[pink]debug **[white]", "")
+				})
 			}
 		})
 	tv.pages.AddPage("page-debug", debugView, true, false)
